@@ -1,0 +1,621 @@
+{% extends "Base/base.html" %}
+{% load static %}
+
+{% block title %}Shree Rastriya Mavi School - Achievements{% endblock title %}
+
+{% block links %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Newsreader:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #2563EB;
+            --secondary-blue: #3B82F6;
+            --dark-blue: #1E40AF;
+            --light-blue: #EFF6FF;
+            --accent-blue: #DBEAFE;
+            --primary-green: #059669;
+            --secondary-green: #10B981;
+            --dark-green: #047857;
+            --light-green: #ECFDF5;
+            --text-dark: #0d151c;
+            --text-light: #49749c;
+            --text-white: #FFFFFF;
+            --bg-white: #FFFFFF;
+            --bg-light: #f8fafc;
+            --bg-gray: #e7edf4;
+            --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+        }
+
+        /* Full Screen Layout */
+        .achievements-wrapper {
+            min-height: 100vh;
+            width: 100%;
+            background-color: var(--bg-light);
+        }
+
+        /* Content Container */
+        .content-container {
+            position: relative;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .achievements-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header Section */
+        .achievements-header {
+            text-align: center;
+            padding: 3rem 1rem 2rem;
+        }
+
+        .achievements-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .achievements-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Featured Achievements */
+        .featured-section {
+            margin: 3rem 0;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .featured-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .featured-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .featured-image {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .featured-content {
+            padding: 1.5rem;
+        }
+
+        .featured-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-description {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Achievement Categories */
+        .category-section {
+            margin: 3rem 0;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .achievement-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid var(--bg-gray);
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary-blue);
+        }
+
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .achievement-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-description {
+            color: var(--text-light);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            margin: 4rem 0;
+            background: white;
+            border-radius: 15px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .timeline-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 80px;
+            margin-bottom: 3rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 18px;
+            top: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 0 4px var(--light-blue);
+        }
+
+        .timeline-year {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-description {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            background: var(--gradient-primary);
+            border-radius: 15px;
+            padding: 3rem;
+            margin: 3rem 0;
+            color: white;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Call to Action */
+        .cta-section {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 15px;
+            margin: 3rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .cta-description {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .achievements-container {
+                padding: 0 1rem;
+            }
+
+            .achievements-title {
+                font-size: 2rem;
+            }
+
+            .featured-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .achievements-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-item {
+                padding-left: 60px;
+            }
+
+            .timeline-line {
+                left: 20px;
+            }
+
+            .timeline-dot {
+                left: 8px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .timeline-section,
+            .stats-section,
+            .cta-section {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        /* Animation for cards */
+        .achievement-card,
+        .featured-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .achievement-card:nth-child(1) { animation-delay: 0.1s; }
+        .achievement-card:nth-child(2) { animation-delay: 0.2s; }
+        .achievement-card:nth-child(3) { animation-delay: 0.3s; }
+        .achievement-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+{% endblock links %}
+
+{% block content %}
+<div class="achievements-wrapper">
+    <!-- Content Container -->
+    <div class="content-container">
+        <div class="achievements-container">
+            <!-- Header -->
+            <div class="achievements-header">
+                <h1 class="achievements-title">Our Achievements</h1>
+                <p class="achievements-subtitle">
+                    Celebrating the successes of our students, faculty, and the entire Shree Rastriya Mavi School community.
+                </p>
+            </div>
+
+            <!-- Featured Achievements -->
+            <section class="featured-section">
+                <h2 class="section-title">Featured Achievements</h2>
+                <div class="featured-grid">
+                    <div class="featured-card">
+                        <div class="featured-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAP5x5I6Vs8VBYzx1n--qOX5F41SjqpXwYt6GaPJPLNwWZ30Sc9T9lNStnZG7prGgqMARUrNsM1mGoP5D25uhBFulEkVyQ1bQW8BSz_aDGrtP62kQYt-f-PzZcFofjUM8LGRdzWFJ88TNEpNThh8aXQk9VqF6-V-eYVs4cFH0Y3tw13lJli1qZynS8CQinF8x1wt0Dd2hj05JI6HgayRjJBYT5wkpOSv37m57mDCa8Er0GXW6cDted4vUnCryNZB8demYGbESmkMgw');"></div>
+                        <div class="featured-content">
+                            <h3 class="featured-title">Academic Excellence Awards</h3>
+                            <p class="featured-description">Recognizing outstanding academic performance and dedication to learning excellence.</p>
+                        </div>
+                    </div>
+                    <div class="featured-card">
+                        <div class="featured-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB3mcLUkkIGNFsisDfp4PBfWm5zcylkvlPkvSnG9cjGrzgKaWCCUlmuw96Hes30-LpQrHERGfg7VMNMlclszE3IUBIJKiE3qzsAyAXaYLIBE1JLdFKNETtUi8S9BNWySfJOh1fCGEu3WhAqxZTJdIugQt30pEjYhyAUXTpvmEW2kF8g_hQTfPEA8_eUKAm5M9ctLJf4TwwHXiAc5PW6hA4kwyScJK0dIEPAePh5_d2sXKytVDDNNwpHN8NFNqJi8tj09EM3gxFC3lk');"></div>
+                        <div class="featured-content">
+                            <h3 class="featured-title">Sports Championship Victory</h3>
+                            <p class="featured-description">Celebrating the triumph of our sports teams in regional and national competitions.</p>
+                        </div>
+                    </div>
+                    <div class="featured-card">
+                        <div class="featured-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDqZ0suzKQMOWCdEW59wvoTtLHf7Sbn16AQ_QJC5UfJY-xdSw51gyiZ_kKRD6DjGsPC-DuLQR9G2YiMg0-1aXQ-uFrKEgeQzGbI84cmEVTRLTFi-pjTYBoPkS3FvtOkgnP8j_67VZArWd_gUOCo_8COfZYlURCU8r6BUM5ukJN_pb0KActw6ADTXFEe-IwymJhzR2id5ZGEFSH3wrAXJFEzAiA6scGJjlhk17jKFbQhuy0yizLtquS712f21BehW9vlggt_9-nvCpA');"></div>
+                        <div class="featured-content">
+                            <h3 class="featured-title">Arts & Cultural Excellence</h3>
+                            <p class="featured-description">Highlighting the creativity and talent of our students in arts and cultural programs.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Academic Achievements -->
+            <section class="category-section">
+                <h2 class="section-title">Academic Achievements</h2>
+                <div class="achievements-grid">
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3 class="achievement-title">National Merit Scholars</h3>
+                        <p class="achievement-description">Students recognized for exceptional academic performance and leadership qualities.</p>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3 class="achievement-title">Science Fair Winners</h3>
+                        <p class="achievement-description">Multiple awards in regional and national science competitions.</p>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3 class="achievement-title">Research Publications</h3>
+                        <p class="achievement-description">Students' research papers published in academic journals and conferences.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sports Achievements -->
+            <section class="category-section">
+                <h2 class="section-title">Sports Achievements</h2>
+                <div class="achievements-grid">
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <h3 class="achievement-title">Regional Champions</h3>
+                        <p class="achievement-description">Basketball and football teams win regional championships.</p>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h3 class="achievement-title">Individual Excellence</h3>
+                        <p class="achievement-description">Athletes receive individual awards for outstanding performance.</p>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="achievement-title">Team Spirit Award</h3>
+                        <p class="achievement-description">Recognizing teams with the best spirit and sportsmanship.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section class="stats-section">
+                <h2 class="section-title" style="color: white;">Achievement Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">150+</div>
+                        <div class="stat-label">Awards Won</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">95%</div>
+                        <div class="stat-label">College Acceptance Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">25+</div>
+                        <div class="stat-label">National Competitions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Community Service Hours</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timeline of Achievements -->
+            <section class="timeline-section">
+                <h2 class="section-title">Timeline of Major Achievements</h2>
+                <div class="timeline-container">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-year">2024</div>
+                        <h3 class="timeline-title">School Excellence Award</h3>
+                        <p class="timeline-description">Recognized as one of the top schools in the region for overall excellence in education.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-year">2023</div>
+                        <h3 class="timeline-title">National Science Competition</h3>
+                        <p class="timeline-description">Students won first place in the national science fair with innovative environmental projects.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-year">2022</div>
+                        <h3 class="timeline-title">Sports Championship Victory</h3>
+                        <p class="timeline-description">Multiple sports teams achieved championship status in regional competitions.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-year">2021</div>
+                        <h3 class="timeline-title">Academic Excellence Recognition</h3>
+                        <p class="timeline-description">Awarded for outstanding academic performance and innovative teaching methods.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Call to Action -->
+            <section class="cta-section">
+                <h2 class="cta-title">Be Part of Our Success Story</h2>
+                <p class="cta-description">
+                    Join Shree Rastriya Mavi School and become part of a community that celebrates excellence, 
+                    fosters growth, and creates opportunities for every student to achieve their dreams.
+                </p>
+                <a href="{% url "home:admission" %}">
+                <button class="cta-button">
+                    <i class="fas fa-rocket"></i>
+                    Learn More About Admissions
+                </button>
+               </a>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all achievement cards
+        document.querySelectorAll('.achievement-card, .featured-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Animate statistics when they come into view
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumbers = entry.target.querySelectorAll('.stat-number');
+                    statNumbers.forEach(stat => {
+                        const finalValue = stat.textContent;
+                        const numericValue = parseInt(finalValue.replace(/\D/g, ''));
+                        const suffix = finalValue.replace(/\d/g, '');
+                        
+                        let currentValue = 0;
+                        const increment = numericValue / 50;
+                        
+                        const timer = setInterval(() => {
+                            currentValue += increment;
+                            if (currentValue >= numericValue) {
+                                stat.textContent = finalValue;
+                                clearInterval(timer);
+                            } else {
+                                stat.textContent = Math.floor(currentValue) + suffix;
+                            }
+                        }, 30);
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+            statsObserver.observe(statsSection);
+        }
+
+
+        // Card hover effects
+        document.querySelectorAll('.achievement-card, .featured-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+        });
+    });
+</script>
+{% endblock content %}

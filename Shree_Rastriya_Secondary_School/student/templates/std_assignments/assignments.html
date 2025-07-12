@@ -1,0 +1,937 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Download Notes - Student Dashboard{% endblock %}
+
+{% block header_title %}Download Notes{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Notes page specific styles */
+    .notes-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    /* Enhanced Search and Filter Section */
+    .search-filter-section {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-filter-grid {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .search-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        position: relative;
+    }
+
+    .search-group label {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .search-input {
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(42, 123, 237, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        bottom: 0.875rem;
+        color: var(--text-muted);
+        width: 16px;
+        height: 16px;
+        pointer-events: none;
+    }
+
+    .clear-search {
+        position: absolute;
+        right: 0.75rem;
+        bottom: 0.875rem;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+        display: none;
+    }
+
+    .clear-search.show {
+        display: block;
+    }
+
+    .filter-select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(42, 123, 237, 0.1);
+    }
+
+    .clear-filters-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .clear-filters-btn:hover {
+        background: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+        transform: translateY(-1px);
+    }
+
+    /* Results Info */
+    .results-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 0;
+    }
+
+    .results-count {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .sort-options {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sort-select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+    /* Notes Grid */
+    .notes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .note-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+    }
+
+    .note-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        border-color: var(--accent-color);
+    }
+
+    .note-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+    }
+
+    .note-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .pdf-icon {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(238, 90, 36, 0.3);
+    }
+
+    .note-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .note-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        word-wrap: break-word;
+    }
+
+    .note-subject {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: var(--accent-color);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .note-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .note-date,
+    .note-size {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .note-date svg,
+    .note-size svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .note-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .download-btn {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .download-btn:hover {
+        background: var(--accent-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(42, 123, 237, 0.3);
+    }
+
+    .preview-btn {
+        padding: 0.75rem;
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .preview-btn:hover {
+        background: var(--success-color);
+        color: white;
+        border-color: var(--success-color);
+    }
+
+    .no-file-message {
+        color: var(--text-muted);
+        font-style: italic;
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px dashed var(--border-color);
+    }
+
+    /* Enhanced Empty State */
+    .empty-state {
+        display: none;
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+        border: 2px dashed var(--border-color);
+        border-radius: 16px;
+        margin: 2rem 0;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .empty-state.show {
+        display: block;
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        color: var(--accent-color);
+        opacity: 0.7;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.5;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    /* Search highlighting */
+    .highlight {
+        background-color: yellow;
+        color: black;
+        padding: 0.1rem 0.2rem;
+        border-radius: 3px;
+        font-weight: 600;
+    }
+
+    /* Loading state */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .loading.show {
+        display: block;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .notes-container {
+            padding: 0.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .search-filter-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .notes-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .note-actions {
+            flex-direction: column;
+        }
+
+        .download-btn {
+            flex: none;
+        }
+
+        .results-info {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .search-filter-section {
+            padding: 1rem;
+        }
+
+        .note-card {
+            padding: 1rem;
+        }
+
+        .note-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+    }
+
+    /* Dark theme adjustments */
+    [data-theme="dark"] .pdf-icon {
+        box-shadow: 0 4px 12px rgba(238, 90, 36, 0.2);
+    }
+
+    [data-theme="dark"] .download-btn:hover {
+        box-shadow: 0 4px 12px rgba(42, 123, 237, 0.2);
+    }
+
+    [data-theme="dark"] .empty-state {
+        background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+    }
+
+    [data-theme="dark"] .highlight {
+        background-color: #ffd700;
+        color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notes-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📚 Download Notes</h1>
+        <p>Access and download your study materials and class notes</p>
+    </div>
+    
+    <!-- Enhanced Search and Filter Section -->
+    <div class="search-filter-section">
+        <div class="search-filter-grid">
+            <div class="search-group">
+                <label for="searchNotes">Search Assignments</label>
+                <div style="position: relative;">
+                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" id="searchNotes" class="search-input" placeholder="Search by title or subject..." autocomplete="off">
+                    <button class="clear-search" id="clearSearch">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="search-group">
+                <label for="subjectFilter">Filter by Subject</label>
+                <select id="subjectFilter" class="filter-select">
+                    <option value="">All Subjects</option>
+                    <!-- Generate unique subjects from assignments -->
+                 
+                    {% for subject in student.student_class.subjects.all %}
+                    <option value="{{subject.name}}">{{subject.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="clear-filters-btn" id="clearFiltersBtn">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Clear Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="results-info">
+        <span class="results-count" id="resultsCount">Showing all assignments</span>
+        <div class="sort-options">
+            <label for="sortSelect" style="font-size: 0.875rem; color: var(--text-secondary);">Sorted by:</label>
+            <select id="sortSelect" class="sort-select">
+                <option value="date-desc">Newest First</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading" id="loading">
+        <svg width="40" height="40" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1-15.357-2m15.357 2H15"></path>
+        </svg>
+        <p>Loading assignments...</p>
+    </div>
+
+    <!-- Notes Grid -->
+    <div class="notes-grid" id="notesGrid">
+       {% for assignment in assignments %} 
+        <div class="note-card" 
+             data-subject="{{assignment.subject}}" 
+             data-title="{{assignment.title}}"
+             data-date="{{assignment.uploaded_at|date:'Y-m-d'}}"
+             data-search-text="{{assignment.title|lower}} {{assignment.subject|lower}}">
+            <div class="note-header">
+                <div class="pdf-icon">
+                    <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                </div>
+                <div class="note-info">
+                    <h3 class="note-title">{{assignment.title}}</h3>
+                    <span class="note-subject">{{assignment.subject}}</span>
+                </div>
+            </div>
+            <div class="note-meta">
+                <div class="note-date">
+                    <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"/>
+                    </svg>
+                    <span>Uploaded: {{assignment.uploaded_at}}</span>
+                </div>
+                <div class="note-size">
+                    <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    {% if assignment.pdf_file %}
+                     <span>{{ assignment.pdf_file.size|filesizeformat }}</span>
+                     {% else %}
+                     <span>No file</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="note-actions">
+                {% if assignment.pdf_file %}
+                <a href="{{assignment.pdf_file.url}}" download class="download-btn">
+                    <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                    </svg>
+                    Download
+                </a>
+                
+                <a href="{{assignment.pdf_file.url}}" target="_blank" class="preview-btn" title="Preview">
+                    <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                    </svg>
+                </a>
+                {% else %}
+                <div class="no-file-message">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 256 256" style="margin-right: 0.5rem;">
+                        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"></path>
+                    </svg>
+                    No file has been uploaded!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Enhanced Empty State -->
+    <div class="empty-state" id="emptyState">
+        <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3>No assignment found!</h3>
+        <p id="emptyStateMessage">No assignments match your search or filter criteria. Try adjusting your search terms or selecting a different subject.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    
+    // Elements
+    const searchInput = document.getElementById('searchNotes');
+    const clearSearch = document.getElementById('clearSearch');
+    const subjectFilter = document.getElementById('subjectFilter');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    const sortSelect = document.getElementById('sortSelect');
+    const notesGrid = document.getElementById('notesGrid');
+    const emptyState = document.getElementById('emptyState');
+    const emptyStateMessage = document.getElementById('emptyStateMessage');
+    const resultsCount = document.getElementById('resultsCount');
+    const loading = document.getElementById('loading');
+    const noteCards = document.querySelectorAll('.note-card');
+    
+    // State
+    let searchTerm = '';
+    let selectedSubject = '';
+    let sortBy = 'date-desc';
+    let originalAssignmentData = [];
+    
+    // Store original assignment data for search and sorting
+    noteCards.forEach(card => {
+        const titleElement = card.querySelector('.note-title');
+        const subjectElement = card.querySelector('.note-subject');
+        const dateAttribute = card.getAttribute('data-date');
+        const searchText = card.getAttribute('data-search-text');
+        
+        if (titleElement && subjectElement && dateAttribute) {
+            originalAssignmentData.push({
+                element: card,
+                title: titleElement.textContent.trim(),
+                subject: subjectElement.textContent.trim(),
+                date: new Date(dateAttribute),
+                searchText: searchText || '',
+                originalTitle: titleElement.innerHTML,
+                originalSubject: subjectElement.innerHTML
+            });
+        }
+    });
+    
+
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        searchTerm = this.value.toLowerCase().trim();
+        
+        // Show/hide clear button
+        if (searchTerm) {
+            clearSearch.classList.add('show');
+        } else {
+            clearSearch.classList.remove('show');
+        }
+        
+        // Apply filters with debounce
+        clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(() => {
+            applyFilters();
+        }, 300);
+    });
+    
+    // Clear search
+    clearSearch.addEventListener('click', function() {
+        searchInput.value = '';
+        searchTerm = '';
+        clearSearch.classList.remove('show');
+        applyFilters();
+        searchInput.focus();
+    });
+    
+    // Subject filter
+    subjectFilter.addEventListener('change', function() {
+        selectedSubject = this.value;
+        applyFilters();
+    });
+    
+    // Sort functionality
+    sortSelect.addEventListener('change', function() {
+        sortBy = this.value;
+        applyFilters();
+    });
+    
+    // Clear all filters
+    clearFiltersBtn.addEventListener('click', function() {
+        // Reset all filters
+        searchInput.value = '';
+        searchTerm = '';
+        clearSearch.classList.remove('show');
+        
+        subjectFilter.value = '';
+        selectedSubject = '';
+        
+        sortSelect.value = 'date-desc';
+        sortBy = 'date-desc';
+        
+        applyFilters();
+        searchInput.focus();
+    });
+    
+    // Apply filters and search - OPTIMIZED VERSION
+    function applyFilters() {
+
+        
+        // Show loading
+        loading.classList.add('show');
+        notesGrid.style.opacity = '0.5';
+        
+        setTimeout(() => {
+            let filteredData = [...originalAssignmentData];
+            
+            // Apply search filter
+            if (searchTerm) {
+                filteredData = filteredData.filter(item => 
+                    item.searchText.includes(searchTerm)
+                );
+            }
+            
+            // Apply subject filter
+            if (selectedSubject) {
+                filteredData = filteredData.filter(item => 
+                    item.subject.toLowerCase() === selectedSubject.toLowerCase()
+                );
+            }
+            
+            // Sort the filtered data
+            filteredData.sort((a, b) => {
+                switch (sortBy) {
+                    case 'date-desc':
+                        return b.date - a.date;
+                    case 'date-asc':
+                        return a.date - b.date;
+                    case 'title-asc':
+                        return a.title.localeCompare(b.title);
+                    case 'title-desc':
+                        return b.title.localeCompare(a.title);
+                    case 'subject-asc':
+                        return a.subject.localeCompare(b.subject);
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Hide all cards first
+            originalAssignmentData.forEach(item => {
+                item.element.style.display = 'none';
+            });
+            
+            // Show and reorder filtered cards
+            const gridContainer = notesGrid;
+            filteredData.forEach((item, index) => {
+                item.element.style.display = 'block';
+                item.element.style.order = index;
+                
+                // Highlight search terms
+                if (searchTerm) {
+                    highlightSearchTerms(item.element, searchTerm);
+                } else {
+                    removeHighlights(item.element);
+                }
+            });
+            
+            // Update results count
+            updateResultsCount(filteredData.length);
+            
+            // Show/hide empty state
+            if (filteredData.length === 0) {
+                emptyState.classList.add('show');
+                notesGrid.style.display = 'none';
+                
+                // Custom message based on filters
+                if (searchTerm && selectedSubject) {
+                    emptyStateMessage.textContent = `No assignment found for "${searchTerm}" in ${selectedSubject} subject. Try a different search term or subject.`;
+                } else if (searchTerm) {
+                    emptyStateMessage.textContent = `No assignment found for "${searchTerm}". Try a different search term.`;
+                } else if (selectedSubject) {
+                    emptyStateMessage.textContent = `No assignment found in ${selectedSubject} subject. Try a different subject.`;
+                } else {
+                    emptyStateMessage.textContent = 'No assignment found! No assignments are available.';
+                }
+            } else {
+                emptyState.classList.remove('show');
+                notesGrid.style.display = 'grid';
+            }
+            
+            // Hide loading
+            loading.classList.remove('show');
+            notesGrid.style.opacity = '1';
+            
+    
+        }, 300);
+    }
+    
+    // Update results count
+    function updateResultsCount(count) {
+        if (count === 0) {
+            resultsCount.textContent = 'No results found';
+        } else if (count === 1) {
+            resultsCount.textContent = 'Showing 1 assignment';
+        } else if (searchTerm || selectedSubject) {
+            resultsCount.textContent = `Showing ${count} of ${originalAssignmentData.length} assignments`;
+        } else {
+            resultsCount.textContent = `Showing all ${count} assignments`;
+        }
+    }
+    
+    // Highlight search terms
+    function highlightSearchTerms(element, term) {
+        const titleElement = element.querySelector('.note-title');
+        const subjectElement = element.querySelector('.note-subject');
+        
+        [titleElement, subjectElement].forEach(el => {
+            if (el && el.dataset.originalText) {
+                el.innerHTML = el.dataset.originalText;
+            } else if (el) {
+                el.dataset.originalText = el.innerHTML;
+            }
+            
+            if (el && term) {
+                const regex = new RegExp(`(${term})`, 'gi');
+                el.innerHTML = el.innerHTML.replace(regex, '<span class="highlight">$1</span>');
+            }
+        });
+    }
+    
+    // Remove highlights
+    function removeHighlights(element) {
+        const titleElement = element.querySelector('.note-title');
+        const subjectElement = element.querySelector('.note-subject');
+        
+        [titleElement, subjectElement].forEach(el => {
+            if (el && el.dataset.originalText) {
+                el.innerHTML = el.dataset.originalText;
+            }
+        });
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + K to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        
+        // Escape to clear search
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            if (searchInput.value) {
+                searchInput.value = '';
+                searchTerm = '';
+                clearSearch.classList.remove('show');
+                applyFilters();
+            } else {
+                searchInput.blur();
+            }
+        }
+    });
+    
+    // Initialize
+    updateResultsCount(originalAssignmentData.length);
+    
+    // Add haptic feedback for mobile
+    if (navigator.vibrate) {
+        [clearFiltersBtn, clearSearch].forEach(btn => {
+            btn.addEventListener('click', () => navigator.vibrate(50));
+        });
+    }
+    
+
+});
+
+// Download notification function
+function downloadNote(filename) {
+
+    showNotification('Download started: ' + filename, 'success');
+}
+
+// Show notification function
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: ${type === 'success' ? 'var(--success-color)' : 'var(--accent-color)'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        font-weight: 500;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

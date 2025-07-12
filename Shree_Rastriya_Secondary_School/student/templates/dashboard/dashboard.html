@@ -1,0 +1,405 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Student Portal{% endblock %}
+
+{% block header_title %}Student Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard specific styles */
+    .dashboard-content {
+        padding: 1rem;
+    }
+    
+    /* Student Profile Section */
+    .student-profile {
+        margin-bottom: 2rem;
+    }
+    
+    .profile-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-image img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--accent-color);
+    }
+    
+    .profile-info h2 {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-info p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    /* Academic Overview */
+    .academic-overview {
+        margin-bottom: 2rem;
+    }
+    
+    .academic-overview h2 {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-card h3 {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-value {
+        color: var(--accent-color);
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    /* Assignments Section */
+    .assignments-section, .grades-section, .notices-section, .communication-section {
+        margin-bottom: 2rem;
+    }
+    
+    .assignments-section h2, .grades-section h2, .notices-section h2, .communication-section h2 {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .assignment-list, .grade-list, .notice-list, .communication-list {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .assignment-item, .grade-item, .notice-item, .communication-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s ease;
+    }
+    
+    .assignment-item:last-child, .grade-item:last-child, .notice-item:last-child, .communication-item:last-child {
+        border-bottom: none;
+    }
+    
+    .assignment-item:hover, .grade-item:hover, .notice-item:hover, .communication-item:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .assignment-icon, .grade-icon, .notice-icon, .communication-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--accent-color);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .assignment-details h3, .grade-details h3 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .assignment-details p, .grade-details p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+    
+    .notice-item p, .communication-item p {
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        margin: 0;
+        flex: 1;
+    }
+    
+    /* Responsive Design */
+    @media (min-width: 768px) {
+        .dashboard-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .profile-card {
+            padding: 2rem;
+        }
+        
+        .profile-image img {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .assignments-section, .grades-section {
+            margin-bottom: 0;
+        }
+        
+        .notices-section, .communication-section {
+            margin-bottom: 0;
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .dashboard-content {
+            padding: 2rem 3rem;
+        }
+        
+        .dashboard-grid {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
+    
+    /* Dark mode adjustments */
+    [data-theme="dark"] .profile-card,
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .assignment-list,
+    [data-theme="dark"] .grade-list,
+    [data-theme="dark"] .notice-list,
+    [data-theme="dark"] .communication-list {
+        background: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .assignment-item:hover,
+    [data-theme="dark"] .grade-item:hover,
+    [data-theme="dark"] .notice-item:hover,
+    [data-theme="dark"] .communication-item:hover {
+        background: var(--bg-primary);
+    }
+    
+    /* Welcome header */
+    .content-header {
+        margin-bottom: 2rem;
+    }
+    
+    .content-header h1 {
+        color: var(--text-primary);
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    @media (min-width: 768px) {
+        .content-header h1 {
+            font-size: 2.5rem;
+        }
+    }
+
+    /* Empty State Styles */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Hover effects for clickable items */
+    .assignment-item:hover,
+    .notice-item:hover {
+        background: var(--bg-tertiary) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .assignment-item,
+    .notice-item {
+        transition: all 0.3s ease;
+    }
+
+    /* Dark mode empty state */
+    [data-theme="dark"] .empty-state {
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Welcome Header -->
+    <div class="content-header">
+            <h2> Welcome , {{student.first_name|upper}} </h2>
+    </div>
+    
+    
+    <!-- Student Profile Section -->
+    <div class="student-profile">
+        <div class="profile-card">
+            <div class="profile-image">
+                <img src="{{student.student_profile.url}}" alt="Student Profile">
+            </div>
+            <div class="profile-info">
+                <h2>{{ student.first_name|default:"Student" }} {{student.last_name}}</h2>
+                <p>Grade: {{ student.student_class.grade|default:"N/A" }}  | {% if student.student_class.faculty %}
+                    Faculty : {{student.student_class.faculty}}
+                    {% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic Overview -->
+    <div class="academic-overview">
+        <h2>Academic Overview</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Roll-No</h3>
+                <p class="stat-value">{{ roll_num|default:"0" }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Section</h3>
+                <p class="stat-value">{{ student_section|default:"N/A" }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Subjects</h3>
+                <p class="stat-value">{{ total_subject|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Left Column -->
+        <div class="dashboard-left">
+            <!-- Upcoming Assignments -->
+            <div class="assignments-section">
+    <h2>Assignments</h2>
+    <div class="assignment-list">
+        {% if assignments %}
+            {% for assignment in assignments %} 
+            <div class="assignment-item" onclick="window.open('{% url "student:assignments" %}', '_blank')" style="cursor: pointer;">
+                <div class="assignment-icon">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"></path>
+                    </svg>
+                </div>
+                <div class="assignment-details">
+                    <h3>Subject: {{assignment.subject}}</h3>
+                    <h3>Title: {{assignment.title}}</h3>
+                    <p>Uploaded: {{assignment.uploaded_at}}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-smile" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                </div>
+                <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Awh snap looks like there is no assignment</h3>
+                <p style="color: var(--text-secondary);">Enjoy! </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+           
+        </div>
+
+        <!-- Right Column -->
+        <div class="dashboard-right">
+            <!-- Notices  -->
+            <div class="notices-section">
+    <h2>Notices </h2>
+    <div class="notice-list">
+        {% if new_s %}
+            {% for news in new_s %} 
+            <div class="notice-item" onclick="window.open('{% url 'student:news_feed' %}', '_blank')" style="cursor: pointer;">
+                <div class="notice-icon">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M240,120a48.05,48.05,0,0,0-48-48H152.2c-2.91-.17-53.62-3.74-101.91-44.24A16,16,0,0,0,24,40V200a16,16,0,0,0,26.29,12.25c37.77-31.68,77-40.76,93.71-43.3v31.72A16,16,0,0,0,151.12,214l11,7.33A16,16,0,0,0,186.5,212l11.77-44.36A48.07,48.07,0,0,0,240,120ZM40,199.93V40h0c42.81,35.91,86.63,45,104,47.24v65.48C126.65,155,82.84,164.07,40,199.93Zm131,8,0,.11-11-7.33V168h21.6ZM192,152H160V88h32a32,32,0,1,1,0,64Z"></path>
+                    </svg>
+                </div>
+                <p>{{news.title}}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-newspaper" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                </div>
+                <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Looks like there is no recent Notice </h3>
+                <p style="color: var(--text-secondary);">Check back later! 📰</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+            
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+{% endblock %}

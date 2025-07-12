@@ -1,0 +1,1265 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Teachers - Student Portal{% endblock %}
+
+{% block header_title %}Teachers{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Mobile-first responsive design */
+    .teachers-container {
+        padding: 1rem;
+    }
+    
+    .search-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .search-wrapper:focus-within {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(42, 123, 237, 0.1);
+    }
+    
+    .search-input {
+        width: 100%;
+        height: 48px;
+        border: none;
+        background: transparent;
+        padding: 0 16px 0 48px;
+        font-size: 16px;
+        color: var(--text-primary);
+        outline: none;
+    }
+    
+    .search-input::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+        width: 20px;
+        height: 20px;
+        z-index: 1;
+    }
+    
+    .clear-search {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        display: none;
+        transition: all 0.3s ease;
+    }
+    
+    .clear-search:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+    
+    .clear-search.show {
+        display: block;
+    }
+    
+    /* Search suggestions */
+    .search-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+    }
+    
+    .suggestion-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+    
+    .suggestion-item:hover {
+        background: var(--bg-secondary);
+    }
+    
+    .suggestion-icon {
+        width: 16px;
+        height: 16px;
+        color: var(--accent-color);
+    }
+    
+    /* No Results Message */
+    .no-results {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        display: none;
+    }
+    
+    .no-results-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        color: var(--text-muted);
+        opacity: 0.5;
+    }
+    
+    .no-results h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+    
+    .no-results p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+    
+    /* Teacher Cards for Mobile */
+    .teacher-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .teacher-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--accent-color);
+        transform: translateY(-2px);
+    }
+    
+    .teacher-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .teacher-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .teacher-info h3 {
+        color: var(--text-primary);
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    
+    .teacher-info h3:hover {
+        color: var(--accent-color);
+    }
+    
+    .teacher-info p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .teacher-subjects {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .subject-icon {
+        width: 16px;
+        height: 16px;
+        color: var(--accent-color);
+    }
+    
+    .contact-btn {
+        background: linear-gradient(135deg, var(--accent-color), #4dabf7);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .contact-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(42, 123, 237, 0.3);
+    }
+    
+    .contact-icon {
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* Desktop Table View */
+    .teachers-table {
+        display: none;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .teachers-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .teachers-table th {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-weight: 600;
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .teachers-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .teachers-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .teachers-table tr:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .table-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .table-avatar:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .teacher-name {
+        color: var(--text-primary);
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    
+    .teacher-name:hover {
+        color: var(--accent-color);
+    }
+    
+    .email-link {
+        color: var(--accent-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .email-link:hover {
+        color: var(--accent-hover);
+        text-decoration: underline;
+    }
+    
+    .email-icon {
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* Teacher Profile Popup */
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    
+    .popup-overlay.show {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .teacher-popup {
+        background: var(--bg-primary);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        position: relative;
+    }
+    
+    .popup-overlay.show .teacher-popup {
+        transform: scale(1);
+        animation: slideUp 0.3s ease;
+    }
+    
+    .popup-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--bg-secondary);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+    }
+    
+    .popup-close:hover {
+        background: var(--danger-color, #ef4444);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .popup-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .popup-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 1rem;
+        border: 4px solid var(--accent-color);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .popup-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .popup-title {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .popup-content {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .info-item:hover {
+        background: var(--bg-tertiary);
+        transform: translateX(4px);
+    }
+    
+    .info-icon {
+        width: 24px;
+        height: 24px;
+        color: var(--accent-color);
+        flex-shrink: 0;
+    }
+    
+    .info-content {
+        flex: 1;
+    }
+    
+    .info-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+        font-size: 1rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .subjects-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .subject-tag {
+        background: var(--accent-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .popup-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .popup-btn {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .popup-btn.primary {
+        background: linear-gradient(135deg, var(--accent-color), #4dabf7);
+        color: white;
+    }
+    
+    .popup-btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(42, 123, 237, 0.3);
+    }
+    
+    .popup-btn.secondary {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+    
+    .popup-btn.secondary:hover {
+        background: var(--bg-tertiary);
+        transform: translateY(-2px);
+    }
+    
+    /* Desktop Styles */
+    @media (min-width: 768px) {
+        .teachers-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .teacher-cards {
+            display: none;
+        }
+        
+        .teachers-table {
+            display: block;
+        }
+        
+        .search-container {
+            max-width: 400px;
+        }
+        
+        .teacher-popup {
+            padding: 3rem;
+        }
+        
+        .popup-actions {
+            flex-direction: row;
+        }
+    }
+    
+    /* Large Desktop */
+    @media (min-width: 1024px) {
+        .teachers-container {
+            padding: 2rem 3rem;
+        }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Dark mode adjustments */
+    [data-theme="dark"] .teacher-card {
+        background: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .teachers-table {
+        background: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .teachers-table th {
+        background: var(--bg-tertiary);
+    }
+    
+    [data-theme="dark"] .teachers-table tr:hover {
+        background: var(--bg-primary);
+    }
+    
+    [data-theme="dark"] .teacher-popup {
+        background: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .search-suggestions {
+        background: var(--bg-secondary);
+    }
+    
+    /* Mobile responsive popup */
+    @media (max-width: 480px) {
+        .teacher-popup {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+        
+        .popup-avatar {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .popup-name {
+            font-size: 1.25rem;
+        }
+        
+        .popup-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="teachers-container">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold mb-2" style="color: var(--text-primary);">Teachers</h1>
+        <p class="text-sm md:text-base" style="color: var(--text-secondary);">View and contact your instructors</p>
+    </div>
+    
+    <!-- Enhanced Search Bar -->
+    <div class="search-container">
+        <div class="search-wrapper">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+            </svg>
+            <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Search by name or subject..."
+                id="teacherSearch"
+                autocomplete="off"
+            />
+            <button class="clear-search" id="clearSearch" title="Clear search">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Search Suggestions -->
+        <div class="search-suggestions" id="searchSuggestions">
+            <div class="suggestion-item" data-search="mathematics">
+                <svg class="suggestion-icon" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M112,56V200a8,8,0,0,1-16,0V124L43.06,154.75a8,8,0,0,1-10.12-12.5L81.82,112,32.94,81.75a8,8,0,1,1,10.12-12.5L96,100V56a8,8,0,0,1,16,0Zm104,48a8,8,0,0,0-8-8H152a8,8,0,0,0,0,16h56A8,8,0,0,0,216,104Zm0,32a8,8,0,0,0-8-8H152a8,8,0,0,0,0,16h56A8,8,0,0,0,216,136Zm0,32a8,8,0,0,0-8-8H152a8,8,0,0,0,0,16h56A8,8,0,0,0,216,168Z"></path>
+                </svg>
+                Mathematics
+            </div>
+            <div class="suggestion-item" data-search="science">
+                <svg class="suggestion-icon" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M225.15,197.71,164.83,106.4,180,72a4,4,0,0,0-3.46-6H79.46a4,4,0,0,0-3.46,6l15.17,34.4L30.85,197.71A12,12,0,0,0,41.27,216H214.73a12,12,0,0,0,10.42-18.29ZM84,74H172l-12,27.12a4,4,0,0,0,.23,3.86l57.63,87.24a4,4,0,0,1-3.47,6.07H41.61a4,4,0,0,1-3.47-6.07l57.63-87.24a4,4,0,0,0,.23-3.86Z"></path>
+                </svg>
+                Science
+            </div>
+            <div class="suggestion-item" data-search="english">
+                <svg class="suggestion-icon" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208V208H48ZM64,80a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,80Zm0,32a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,112Zm0,32a8,8,0,0,1,8-8h80a8,8,0,0,1,0,16H72A8,8,0,0,1,64,144Z"></path>
+                </svg>
+                English
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="teacher-cards" id="teacherCards">
+        {% for teacher in teachers %}
+        <div class="teacher-card" 
+             data-name="{{ teacher.first_name }} {{ teacher.last_name }}" 
+             data-subject="{% for subject in teacher.subject.all %}{{ subject.name }}{% if not forloop.last %}, {% endif %}{% endfor %}" 
+             data-email="{{ teacher.email }}" 
+             data-phone="{{ teacher.contact|default:'+1 (555) 000-0000' }}" 
+             data-office="{{ teacher.office|default:'Office TBA' }}" hidden>
+            <div class="flex items-start">
+                <img src="{% if teacher.teacher_image %}{{ teacher.teacher_image.url }}{% else %}/placeholder.svg?height=60&width=60{% endif %}" 
+                     alt="{{ teacher.first_name }} {{ teacher.last_name }}" 
+                     class="teacher-avatar" 
+                     data-teacher-name="{{ teacher.first_name }} {{ teacher.last_name }}"
+                     data-teacher-email="{{ teacher.email }}"
+                     data-teacher-subjects="{% for subject in teacher.subject.all %}{{ subject.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                     data-teacher-phone="{{ teacher.contact|default:'+1 (555) 000-0000' }}"
+           
+                     data-teacher-image="{% if teacher.teacher_image %}{{ teacher.teacher_image.url }}{% else %}/placeholder.svg?height=120&width=120{% endif %}">
+                <div class="teacher-info flex-1">
+                    <h3 data-teacher-name="{{ teacher.first_name }} {{ teacher.last_name }}"
+                       data-teacher-email="{{ teacher.email }}"
+                       data-teacher-subjects="{% for subject in teacher.subject.all %}{{ subject.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                       data-teacher-phone="{{ teacher.contact|default:'+1 (555) 000-0000' }}"
+        
+                       data-teacher-image="{% if teacher.teacher_image %}{{ teacher.teacher_image.url }}{% else %}/placeholder.svg?height=120&width=120{% endif %}">{{ teacher.first_name }} {{ teacher.last_name }}</h3>
+                    <p class="flex items-center gap-2">
+                        <svg class="email-icon" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                        </svg>
+                        {{ teacher.email }}
+                    </p>
+                    <p class="teacher-subjects">
+                        <svg class="subject-icon" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208V208H48ZM64,80a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,80Zm0,32a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,112Zm0,32a8,8,0,0,1,8-8h80a8,8,0,0,1,0,16H72A8,8,0,0,1,64,144Z"></path>
+                        </svg>
+                        {% for subject in teacher.subject.all %}
+                            {{ subject.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <button class="contact-btn" onclick="contactTeacher('{{ teacher.email }}')">
+                        <svg class="contact-icon" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                        </svg>
+                        Contact Teacher
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-results" style="display: block;">
+            <div class="no-results-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,10a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"></path>
+                </svg>
+            </div>
+            <h3>No Teachers Found</h3>
+            <p>No teachers are currently available. Please check back later.</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Desktop Table View -->
+    <div class="teachers-table" id="teachersTable">
+        <table>
+            <thead>
+                <tr>
+                    <th>Profile</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for teacher in teachers %}
+                <tr data-name="{{ teacher.first_name }} {{ teacher.last_name }}" 
+                    data-subject="{% for subject in teacher.subject.all %}{{ subject.name }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+                    <td>
+                        <img src="{% if teacher.teacher_image %}{{ teacher.teacher_image.url }}{% else %}/placeholder.svg?height=40&width=40{% endif %}" 
+                             alt="{{ teacher.first_name }} {{ teacher.last_name }}" 
+                             class="table-avatar" 
+                             data-teacher-name="{{ teacher.first_name }} {{ teacher.last_name }}"
+                             data-teacher-email="{{ teacher.email }}"
+                             data-teacher-subjects="{% for subject in teacher.subject.all %}{{ subject.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                             data-teacher-phone="{{ teacher.contact|default:'+1 (555) 000-0000' }}"
+                             data-teacher-office="{{ teacher.office|default:'Office TBA' }}"
+                             data-teacher-image="{% if teacher.teacher_image %}{{ teacher.teacher_image.url }}{% else %}/placeholder.svg?height=120&width=120{% endif %}">
+                    </td>
+                    <td class="teacher-name" 
+                        data-teacher-name="{{ teacher.first_name }} {{ teacher.last_name }}"
+                        data-teacher-email="{{ teacher.email }}"
+                        data-teacher-subjects="{% for subject in teacher.subject.all %}{{ subject.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                        data-teacher-phone="{{ teacher.contact|default:'+1 (555) 000-0000' }}"
+                        data-teacher-office="{{ teacher.office|default:'Office TBA' }}"
+                        data-teacher-image="{% if teacher.teacher_image %}{{ teacher.teacher_image.url }}{% else %}/placeholder.svg?height=120&width=120{% endif %}">{{ teacher.first_name }} {{ teacher.last_name }}</td>
+                    <td>
+                        <a href="#" class="email-link" onclick="contactTeacher('{{ teacher.email }}')">
+                            <svg class="email-icon" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                            </svg>
+                            {{ teacher.email }}
+                        </a>
+                    </td>
+                    <td>
+                        {% for subject in teacher.subject.all %}
+                            {{ subject.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <button class="contact-btn" onclick="contactTeacher('{{ teacher.email }}')">
+                            <svg class="contact-icon" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                            </svg>
+                            Contact
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-8">
+                        <div class="no-results" style="display: block; padding: 2rem;">
+                            <h3>No Teachers Found</h3>
+                            <p>No teachers are currently available.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- No Results Message -->
+    <div class="no-results" id="noResults">
+        <div class="no-results-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"></path>
+            </svg>
+        </div>
+        <h3>Teacher Not Found</h3>
+        <p>No teachers match your search criteria. Try searching with a different name or subject.</p>
+    </div>
+</div>
+
+<!-- Teacher Profile Popup -->
+<div class="popup-overlay" id="teacherPopup">
+    <div class="teacher-popup">
+        <button class="popup-close" onclick="closeTeacherPopup()">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
+            </svg>
+        </button>
+        
+        <div class="popup-header">
+            <img id="popupAvatar" src="" alt="" class="popup-avatar">
+            <h2 id="popupName" class="popup-name"></h2>
+            <p id="popupTitle" class="popup-title">Teacher</p>
+        </div>
+        
+        <div class="popup-content">
+            <div class="info-item">
+                <svg class="info-icon" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                </svg>
+                <div class="info-content">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value" id="popupEmail"></div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <svg class="info-icon" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.64a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.88-48.92A16,16,0,0,0,222.37,158.46ZM176,208A128.14,128.14,0,0,1,48,80,40.2,40.2,0,0,1,82.87,40a.61.61,0,0,0,0,.12l21,47L83.2,111.86a6.13,6.13,0,0,0-.57.77,16,16,0,0,0-1,15.7c9.06,18.53,27.73,37.06,46.46,46.11a16,16,0,0,0,15.75-1.14,8.44,8.44,0,0,0,.74-.56L168.89,152l47,21.05h0s.08,0,.11,0A40.21,40.21,0,0,1,176,208Z"></path>
+                </svg>
+                <div class="info-content">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value" id="popupPhone"></div>
+                </div>
+            </div>
+            
+
+            <div class="info-item">
+                <svg class="info-icon" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,48H208V208H48ZM64,80a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,80Zm0,32a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,112Zm0,32a8,8,0,0,1,8-8h80a8,8,0,0,1,0,16H72A8,8,0,0,1,64,144Z"></path>
+                </svg>
+                <div class="info-content">
+                    <div class="info-label">Subjects</div>
+                    <div class="info-value">
+                        <div class="subjects-list" id="popupSubjects"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="popup-actions">
+            <button class="popup-btn primary" onclick="contactTeacherFromPopup()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                </svg>
+                Send Email
+            </button>
+            <button class="popup-btn secondary" onclick="closeTeacherPopup()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables
+let currentTeacherEmail = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing teachers page...'); // Debug log
+    
+    const searchInput = document.getElementById('teacherSearch');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    const teacherCards = document.querySelectorAll('.teacher-card');
+    const tableRows = document.querySelectorAll('.teachers-table tbody tr');
+    const noResults = document.getElementById('noResults');
+    
+    // Initialize popup functionality
+    initializePopupFunctionality();
+    
+    // Enhanced search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            let hasVisibleResults = false;
+            
+            // Show/hide clear button
+            if (searchTerm) {
+                clearSearchBtn.classList.add('show');
+            } else {
+                clearSearchBtn.classList.remove('show');
+            }
+            
+            // Filter cards (mobile)
+            teacherCards.forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                const subject = card.getAttribute('data-subject').toLowerCase();
+                
+                if (name.includes(searchTerm) || subject.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    hasVisibleResults = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Filter table rows (desktop)
+            tableRows.forEach(row => {
+                const name = row.getAttribute('data-name').toLowerCase();
+                const subject = row.getAttribute('data-subject').toLowerCase();
+                
+                if (name.includes(searchTerm) || subject.includes(searchTerm)) {
+                    row.style.display = 'table-row';
+                    hasVisibleResults = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Show/hide no results message
+            if (searchTerm && !hasVisibleResults) {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+            
+            // Show/hide suggestions
+            if (searchTerm && searchTerm.length > 0) {
+                showSearchSuggestions(searchTerm);
+            } else {
+                hideSearchSuggestions();
+            }
+        });
+    }
+    
+    // Clear search functionality
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            clearSearchBtn.classList.remove('show');
+            hideSearchSuggestions();
+            
+            // Show all teachers
+            teacherCards.forEach(card => card.style.display = 'block');
+            tableRows.forEach(row => row.style.display = 'table-row');
+            noResults.style.display = 'none';
+            
+            searchInput.focus();
+        });
+    }
+    
+    // Search suggestions functionality
+    function showSearchSuggestions(searchTerm) {
+        const suggestions = document.querySelectorAll('.suggestion-item');
+        let hasMatchingSuggestions = false;
+        
+        suggestions.forEach(suggestion => {
+            const suggestionText = suggestion.textContent.toLowerCase();
+            if (suggestionText.includes(searchTerm)) {
+                suggestion.style.display = 'flex';
+                hasMatchingSuggestions = true;
+            } else {
+                suggestion.style.display = 'none';
+            }
+        });
+        
+        if (hasMatchingSuggestions) {
+            searchSuggestions.style.display = 'block';
+        } else {
+            searchSuggestions.style.display = 'none';
+        }
+    }
+    
+    function hideSearchSuggestions() {
+        if (searchSuggestions) {
+            searchSuggestions.style.display = 'none';
+        }
+    }
+    
+    // Handle suggestion clicks
+    document.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const searchTerm = this.getAttribute('data-search');
+            searchInput.value = searchTerm;
+            hideSearchSuggestions();
+            
+            // Trigger search
+            const event = new Event('input');
+            searchInput.dispatchEvent(event);
+        });
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-container')) {
+            hideSearchSuggestions();
+        }
+    });
+    
+    // Keyboard navigation for suggestions
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            const visibleSuggestions = Array.from(document.querySelectorAll('.suggestion-item')).filter(s => s.style.display !== 'none');
+            
+            if (e.key === 'ArrowDown' && visibleSuggestions.length > 0) {
+                e.preventDefault();
+                visibleSuggestions[0].focus();
+            } else if (e.key === 'Escape') {
+                hideSearchSuggestions();
+            }
+        });
+    }
+    
+    // Make sure mobile view is displayed on smaller screens
+    function checkScreenSize() {
+        const teacherCards = document.getElementById('teacherCards');
+        const teachersTable = document.getElementById('teachersTable');
+        
+        if (window.innerWidth < 768) {
+            if (teacherCards) teacherCards.style.display = 'block';
+            if (teachersTable) teachersTable.style.display = 'none';
+        } else {
+            if (teacherCards) teacherCards.style.display = 'none';
+            if (teachersTable) teachersTable.style.display = 'block';
+        }
+    }
+    
+    // Run on load and resize
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+});
+
+// Initialize popup functionality
+function initializePopupFunctionality() {
+    console.log('Initializing popup functionality...'); // Debug log
+    
+    // Add click listeners to teacher avatars and names
+    const teacherAvatars = document.querySelectorAll('.teacher-avatar, .table-avatar');
+    const teacherNames = document.querySelectorAll('.teacher-info h3, .teacher-name');
+    
+    console.log('Found avatars:', teacherAvatars.length); // Debug log
+    console.log('Found names:', teacherNames.length); // Debug log
+    
+    // Handle avatar clicks
+    teacherAvatars.forEach((avatar, index) => {
+        console.log('Adding click listener to avatar', index); // Debug log
+        avatar.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Avatar clicked!', this); // Debug log
+            
+            const name = this.getAttribute('data-teacher-name');
+            const email = this.getAttribute('data-teacher-email');
+            const subjects = this.getAttribute('data-teacher-subjects');
+            const phone = this.getAttribute('data-teacher-phone');
+            const office = this.getAttribute('data-teacher-office');
+            const imageUrl = this.getAttribute('data-teacher-image');
+            
+            console.log('Teacher data:', { name, email, subjects, phone, office, imageUrl }); // Debug log
+            
+            showTeacherPopup(name, email, subjects, phone, office, imageUrl);
+        });
+    });
+    
+    // Handle name clicks
+    teacherNames.forEach((nameElement, index) => {
+        console.log('Adding click listener to name', index); // Debug log
+        nameElement.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Name clicked!', this); // Debug log
+            
+            const teacherName = this.getAttribute('data-teacher-name');
+            const email = this.getAttribute('data-teacher-email');
+            const subjects = this.getAttribute('data-teacher-subjects');
+            const phone = this.getAttribute('data-teacher-phone');
+            const office = this.getAttribute('data-teacher-office');
+            const imageUrl = this.getAttribute('data-teacher-image');
+            
+            console.log('Teacher data:', { teacherName, email, subjects, phone, office, imageUrl }); // Debug log
+            
+            showTeacherPopup(teacherName, email, subjects, phone, office, imageUrl);
+        });
+    });
+}
+
+// Updated showTeacherPopup function
+function showTeacherPopup(name, email, subjects, phone, office, imageUrl) {
+    console.log('showTeacherPopup called with:', { name, email, subjects, phone, office, imageUrl }); // Debug log
+    
+    const popup = document.getElementById('teacherPopup');
+    const popupAvatar = document.getElementById('popupAvatar');
+    const popupName = document.getElementById('popupName');
+    const popupEmail = document.getElementById('popupEmail');
+    const popupPhone = document.getElementById('popupPhone');
+    const popupOffice = document.getElementById('popupOffice');
+    const popupSubjects = document.getElementById('popupSubjects');
+    
+    if (!popup) {
+        console.error('Popup element not found');
+        return;
+    }
+    
+    console.log('Popup elements found, setting content...'); // Debug log
+    
+    // Set popup content
+    if (popupAvatar) {
+        popupAvatar.src = imageUrl || "{% static 'student/images/nope.jpg' %}";
+        popupAvatar.alt = name;
+        console.log('Set avatar src to:', popupAvatar.src); // Debug log
+    }
+    if (popupName) popupName.textContent = name;
+    if (popupEmail) popupEmail.textContent = email;
+    if (popupPhone) popupPhone.textContent = phone;
+    if (popupOffice) popupOffice.textContent = office;
+    
+    // Create subject tags
+    if (popupSubjects && subjects) {
+        const subjectArray = subjects.split(', ');
+        popupSubjects.innerHTML = '';
+        subjectArray.forEach(subject => {
+            if (subject.trim()) {
+                const tag = document.createElement('span');
+                tag.className = 'subject-tag';
+                tag.textContent = subject.trim();
+                popupSubjects.appendChild(tag);
+            }
+        });
+    }
+    
+    // Store current teacher email for contact function
+    currentTeacherEmail = email;
+    
+    // Show popup with animation
+    popup.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    
+    console.log('Popup should be visible now, classes:', popup.classList); // Debug log
+}
+
+function closeTeacherPopup() {
+    console.log('Closing popup...'); // Debug log
+    const popup = document.getElementById('teacherPopup');
+    if (popup) {
+        popup.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+    currentTeacherEmail = '';
+}
+
+function contactTeacherFromPopup() {
+    if (currentTeacherEmail) {
+        contactTeacher(currentTeacherEmail);
+        closeTeacherPopup();
+    }
+}
+
+// Enhanced contact teacher function with Gmail compose
+function contactTeacher(email) {
+    // Create Gmail compose URL with pre-filled recipient and subject
+    const subject = encodeURIComponent('Student Inquiry - Course Question');
+    const body = encodeURIComponent(`Dear Teacher,
+
+I hope this email finds you well. I am writing to inquire about your course.
+
+Best regards,
+{{student.first_name|title}} {{student.last_name|title}}
+{{student.student_code}}
+`);
+    
+    // Try to open Gmail compose first
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+    
+    // Open Gmail compose in a new tab
+    const gmailWindow = window.open(gmailUrl, '_blank');
+    
+    // Fallback to mailto if Gmail doesn't open (after a short delay)
+    setTimeout(() => {
+        if (!gmailWindow || gmailWindow.closed) {
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        }
+    }, 1000);
+    
+    // Show confirmation toast
+    showToast(`Opening Gmail to compose email to ${email}`, 'success');
+}
+
+// Toast notification function
+function showToast(message, type = 'success') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast-notification');
+    existingToasts.forEach(toast => toast.remove());
+    
+    // Create toast
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 1001;
+        transform: translateY(100px);
+        transition: transform 0.3s ease;
+        font-weight: 500;
+        max-width: 300px;
+        word-wrap: break-word;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => toast.style.transform = 'translateY(0)', 100);
+    
+    // Animate out and remove
+    setTimeout(() => {
+        toast.style.transform = 'translateY(100px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', function(e) {
+    const popup = document.getElementById('teacherPopup');
+    const popupContent = document.querySelector('.teacher-popup');
+    
+    if (popup && popup.classList.contains('show') && popupContent && !popupContent.contains(e.target)) {
+        closeTeacherPopup();
+    }
+});
+
+// Close popup with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const popup = document.getElementById('teacherPopup');
+        if (popup && popup.classList.contains('show')) {
+            closeTeacherPopup();
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,661 @@
+{% extends 'teach_base/base.html' %}
+{% load static %}
+
+{% block title %}Settings - Teacher Dashboard{% endblock %}
+
+{% block header_title %}Settings{% endblock %}
+{% block user_avatar %} {{teacher.teacher_image.url}} {% endblock %}
+{% block extra_css %}
+<style>
+    /* Settings page specific styles - FULL SCREEN */
+    .settings-container {
+        width: 100%;
+        max-width: none;
+        padding: 2rem;
+        min-height: calc(100vh - 80px);
+    }
+
+    .settings-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .settings-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .settings-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .settings-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    /* Settings Sections */
+    .settings-section {
+        background: var(--bg-primary);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title i {
+        color: var(--accent-color);
+        font-size: 1.25rem;
+    }
+
+    /* Form Elements */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-input[type="password"] {
+        font-family: monospace;
+    }
+
+    /* Password validation styles */
+    .form-input.error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-input.success {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .password-message {
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        display: none;
+    }
+
+    .password-message.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        display: block;
+    }
+
+    .password-message.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        display: block;
+    }
+
+    /* Profile Info Section */
+    .profile-info-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--border-color);
+    }
+
+    .profile-details h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .profile-details p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.125rem;
+    }
+
+    .readonly-badge {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .info-notice {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .info-notice i {
+        color: var(--accent-color);
+        font-size: 1.25rem;
+    }
+
+    .info-notice p {
+        margin: 0;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        line-height: 1.4;
+    }
+
+    /* Radio Button Groups */
+    .radio-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .radio-option {
+        position: relative;
+    }
+
+    .radio-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 120px;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-label {
+        border-color: var(--accent-color);
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--accent-color);
+        font-weight: 600;
+    }
+
+    .radio-label:hover {
+        border-color: var(--accent-color);
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #4f46e5 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(239, 68, 68, 0.5);
+    }
+
+    /* Logout Button - Special Red Hover */
+    .logout-btn {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border-color: #ef4444;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(239, 68, 68, 0.5);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .settings-container {
+            padding: 1rem;
+        }
+
+        .settings-section {
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .radio-group {
+            flex-direction: column;
+        }
+
+        .radio-label {
+            min-width: auto;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .profile-info-section {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .readonly-badge {
+            margin-left: 0;
+            margin-top: 1rem;
+        }
+    }
+
+    /* Dark theme adjustments */
+    [data-theme="dark"] .form-input {
+        background-color: var(--bg-tertiary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .form-input::placeholder {
+        color: var(--text-secondary);
+    }
+
+    /* Django Messages */
+    .messages {
+        margin-bottom: 1rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #059669;
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+    }
+
+    .alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        color: #d97706;
+    }
+</style>
+{% endblock %}
+
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="settings-content">
+        <div class="settings-header">
+            <h1 class="settings-title">Settings</h1>
+            <p class="settings-subtitle">Manage your password and appearance preferences</p>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Account Information (Read-Only) -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-user"></i>
+                Account Information
+            </h2>
+
+            <div class="info-notice">
+                <i class="fas fa-info-circle"></i>
+                <p>Your account information is managed by the school administration. Contact your IT department if you need to update your personal details.</p>
+            </div>
+
+            <!-- Profile Info Display -->
+            <div class="profile-info-section">
+                <img src="{{teacher.teacher_image.url}}" alt="Profile Photo" class="profile-avatar">
+                <div class="profile-details">
+                    <h3>{{teacher.first_name}} {{teacher.last_name}}</h3>
+                    <p><strong>Email:</strong> {{teacher.email}}</p>
+                    <p><strong>Contact:</strong> {{teacher.contact}}</p>
+                    <p><strong>Teacher Code:</strong> {{teacher.teacher_code}}</p>
+                </div>
+                <div class="readonly-badge">
+                    <i class="fas fa-lock"></i>
+                    Read Only
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Change -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-shield-alt"></i>
+                Change Password
+            </h2>
+
+            <form method="POST" action="{% url 'teacher:settings' %}" id="passwordForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="currentPassword" class="form-label">
+                        <i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                        Current Password *
+                    </label>
+                    <input type="password" id="currentPassword" name="current_password" class="form-input" placeholder="Enter current password" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newPassword" class="form-label">
+                            <i class="fas fa-key" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                            New Password *
+                        </label>
+                        <input type="password" id="newPassword" name="new_password" class="form-input" placeholder="Enter new password" required minlength="8">
+                        <div class="password-message" id="newPasswordMessage"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">
+                            <i class="fas fa-check-circle" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                            Confirm Password *
+                        </label>
+                        <input type="password" id="confirmPassword" name="confirm_password" class="form-input" placeholder="Confirm new password" required>
+                        <div class="password-message" id="confirmPasswordMessage"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-shield-alt"></i>
+                    Change Password
+                </button>
+            </form>
+        </div>
+
+        <!-- Appearance Preferences -->
+        <div class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-palette"></i>
+                Appearance Preferences
+            </h2>
+
+            <div class="form-group">
+                <label class="form-label">Theme (Saved locally in your browser)</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="lightTheme" name="theme" value="light" checked>
+                        <label for="lightTheme" class="radio-label">
+                            <i class="fas fa-sun" style="margin-right: 0.5rem;"></i>
+                            Light Mode
+                        </label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="darkTheme" name="theme" value="dark">
+                        <label for="darkTheme" class="radio-label">
+                            <i class="fas fa-moon" style="margin-right: 0.5rem;"></i>
+                            Dark Mode
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">    
+            <a href="{% url "teacher:logout" %}">        
+            <button class="btn btn-danger logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Theme handling (Client-side only)
+    const themeRadios = document.querySelectorAll('input[name="theme"]');
+    const currentTheme = localStorage.getItem('dashboard-theme') || 'light';
+    
+    // Set current theme on page load
+    document.querySelector(`input[name="theme"][value="${currentTheme}"]`).checked = true;
+    
+    // Apply current theme
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+    
+    // Theme change listeners
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const theme = this.value;
+                
+                // Apply theme immediately
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('dashboard-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('dashboard-theme', 'light');
+                }
+            }
+        });
+    });
+
+    // Password validation
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const newPasswordMessage = document.getElementById('newPasswordMessage');
+    const confirmPasswordMessage = document.getElementById('confirmPasswordMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function validateNewPassword() {
+        const password = newPasswordInput.value;
+        
+        if (password.length === 0) {
+            newPasswordInput.classList.remove('error', 'success');
+            newPasswordMessage.classList.remove('error', 'success');
+            return;
+        }
+        
+        if (password.length < 8) {
+            newPasswordInput.classList.add('error');
+            newPasswordInput.classList.remove('success');
+            newPasswordMessage.textContent = 'Password must be at least 8 characters long';
+            newPasswordMessage.classList.add('error');
+            newPasswordMessage.classList.remove('success');
+        } else {
+            newPasswordInput.classList.remove('error');
+            newPasswordInput.classList.add('success');
+            newPasswordMessage.textContent = 'Password length is good';
+            newPasswordMessage.classList.remove('error');
+            newPasswordMessage.classList.add('success');
+        }
+        
+        // Also check confirm password when new password changes
+        validateConfirmPassword();
+    }
+
+    function validateConfirmPassword() {
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        if (confirmPassword.length === 0) {
+            confirmPasswordInput.classList.remove('error', 'success');
+            confirmPasswordMessage.classList.remove('error', 'success');
+            updateSubmitButton();
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            confirmPasswordInput.classList.add('error');
+            confirmPasswordInput.classList.remove('success');
+            confirmPasswordMessage.textContent = 'Passwords do not match';
+            confirmPasswordMessage.classList.add('error');
+            confirmPasswordMessage.classList.remove('success');
+        } else if (newPassword.length >= 8) {
+            confirmPasswordInput.classList.remove('error');
+            confirmPasswordInput.classList.add('success');
+            confirmPasswordMessage.textContent = 'Passwords match';
+            confirmPasswordMessage.classList.remove('error');
+            confirmPasswordMessage.classList.add('success');
+        } else {
+            confirmPasswordInput.classList.remove('error', 'success');
+            confirmPasswordMessage.classList.remove('error', 'success');
+        }
+        
+        updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const currentPassword = document.getElementById('currentPassword').value;
+        
+        // Enable submit button only if all conditions are met
+        if (currentPassword.length > 0 && 
+            newPassword.length >= 8 && 
+            confirmPassword.length > 0 && 
+            newPassword === confirmPassword) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    }
+
+    // Add event listeners
+    newPasswordInput.addEventListener('input', validateNewPassword);
+    confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+    document.getElementById('currentPassword').addEventListener('input', updateSubmitButton);
+
+    // Initial validation
+    updateSubmitButton();
+});
+</script>
+{% endblock %}

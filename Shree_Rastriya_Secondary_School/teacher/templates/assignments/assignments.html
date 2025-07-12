@@ -1,0 +1,1976 @@
+{% extends 'teach_base/base.html' %}
+
+{% load static %}
+
+{% block title %}Upload Notes - Teacher Dashboard{% endblock %}
+
+{% block user_avatar %} {{teacher.teacher_image.url}} {% endblock %}
+
+{% block header_title %}Upload Notes{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Upload Notes page specific styles - FULL SCREEN */
+    .upload-container {
+        width: 100%;
+        max-width: none;
+        padding: 2rem;
+        min-height: calc(100vh - 80px); /* Account for header */
+    }
+
+    .upload-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        align-items: start; /* Add this to prevent stretching */
+    }
+
+    .upload-left {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .upload-right {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .upload-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .upload-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+    
+    .form-container {
+        background: var(--bg-primary);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+        max-height: calc(100vh - 4rem); /* Prevent overflow */
+        overflow-y: auto; /* Add scrolling if needed */
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .file-input {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-input-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-secondary);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 56px;
+    }
+    
+    .file-input-label:hover {
+        border-color: var(--accent-color);
+        background-color: var(--bg-tertiary);
+    }
+    
+    .file-input-label.has-file {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 0.875rem 2rem;
+        background: linear-gradient(135deg, var(--accent-color) 0%, #4f46e5 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(59, 130, 246, 0.5);
+    }
+    
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .submit-btn.loading {
+        color: transparent;
+    }
+    
+    .loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        opacity: 0;
+    }
+    
+    .submit-btn.loading .loading-spinner {
+        opacity: 1;
+    }
+    
+    @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    /* Toast Notification Styles */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        max-width: 350px;
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+    }
+    
+    .toast.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .toast.error {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    
+    .toast-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .toast-icon {
+        font-size: 1.25rem;
+    }
+    
+    .toast-message {
+        flex: 1;
+        line-height: 1.4;
+    }
+
+    /* Django Messages Toast Styles */
+    .toast-notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        max-width: 400px;
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .toast-notification.show {
+        transform: translateX(0);
+    }
+
+    .toast-notification.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .toast-notification.error {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .toast-notification.warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .toast-notification.info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .toast-icon {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .toast-message {
+        flex: 1;
+        line-height: 1.4;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        font-size: 1.25rem;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .toast-close:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Recently Uploaded Notes Styles */
+    .recent-notes-section {
+        margin-top: 0;
+        height: 100%;
+        min-height: 600px; /* Ensure minimum height */
+    }
+
+    .recent-notes-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .recent-notes-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .recent-notes-title i {
+        color: var(--accent-color);
+    }
+
+    .recent-notes-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    /* Search Bar Styles */
+    .search-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-input::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1rem;
+        pointer-events: none;
+    }
+
+    .search-clear {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0.25rem;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .search-clear.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .search-clear:hover {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+
+    .search-results-info {
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        text-align: center;
+        display: none;
+    }
+
+    .search-results-info.show {
+        display: block;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        display: none;
+    }
+
+    .no-results.show {
+        display: block;
+    }
+
+    .no-results i {
+        font-size: 3rem;
+        color: var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    .no-results h3 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .no-results p {
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    /* Empty state for no assignments */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        line-height: 1.6;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .recent-notes-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        max-height: calc(100vh - 400px);
+        overflow-y: auto;
+        padding-right: 1rem;
+    }
+
+    .recent-notes-grid::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .recent-notes-grid::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 4px;
+    }
+
+    .recent-notes-grid::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+    .recent-notes-grid::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-color);
+    }
+
+    .note-card {
+        background: var(--bg-primary);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .note-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .note-card.hidden {
+        display: none;
+    }
+
+    .note-card-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .note-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .note-icon .fa-file-pdf {
+        color: #dc2626;
+        background-color: rgba(220, 38, 38, 0.1);
+    }
+
+    .note-icon .fa-file-word {
+        color: #2563eb;
+        background-color: rgba(37, 99, 235, 0.1);
+    }
+
+    .note-icon .fa-file-powerpoint {
+        color: #ea580c;
+        background-color: rgba(234, 88, 12, 0.1);
+    }
+
+    .note-icon .fa-file-alt {
+        color: var(--accent-color);
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .note-info {
+        flex: 1;
+    }
+
+    .note-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        line-height: 1.4;
+    }
+
+    .note-meta {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .note-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: none;
+        background-color: var(--bg-secondary);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        background-color: var(--accent-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .note-description {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .note-stats {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .stat-item i {
+        color: var(--accent-color);
+    }
+
+    .view-all-container {
+        text-align: center;
+    }
+
+    .view-all-btn {
+        padding: 0.75rem 2rem;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .view-all-btn:hover {
+        background-color: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+        transform: translateY(-2px);
+    }
+
+    /* Modal/Popup Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 9999; /* Increase z-index */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .modal-overlay.show .modal-content {
+        transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .modal-title i {
+        color: var(--accent-color);
+    }
+
+    .modal-close {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: none;
+        background-color: var(--bg-secondary);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .modal-close:hover {
+        background-color: var(--border-color);
+        color: var(--text-primary);
+        transform: scale(1.1);
+    }
+
+    .modal-body {
+        margin-bottom: 2rem;
+    }
+
+    .note-preview {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .note-preview-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .note-preview-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .note-preview-info h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .note-preview-info p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .note-preview-description {
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .note-preview-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+
+    .preview-stat {
+        text-align: center;
+        padding: 0.75rem;
+        background: var(--bg-primary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .preview-stat-value {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .preview-stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .modal-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+    }
+
+    .modal-btn-secondary {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .modal-btn-secondary:hover {
+        background-color: var(--bg-tertiary);
+        transform: translateY(-1px);
+    }
+
+    .modal-btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .modal-btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(239, 68, 68, 0.5);
+    }
+
+    .modal-btn-primary {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #4f46e5 100%);
+        color: white;
+    }
+
+    .modal-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(59, 130, 246, 0.5);
+    }
+
+    /* Confirmation Dialog Styles */
+    .confirm-dialog {
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    .confirm-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: #f59e0b;
+    }
+
+    .confirm-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .confirm-message {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 2rem;
+    }
+    
+    /* Mobile responsive adjustments for full screen */
+    @media (max-width: 1024px) {
+        .upload-content {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .form-container {
+            position: static;
+        }
+        
+        .recent-notes-grid {
+            max-height: none;
+            overflow-y: visible;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .upload-container {
+            padding: 1rem;
+        }
+        
+        .upload-content {
+            gap: 1.5rem;
+        }
+        
+        .form-container {
+            padding: 1.5rem;
+        }
+        
+        .recent-notes-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .note-card {
+            padding: 1.25rem;
+        }
+        
+        .note-card-header {
+            gap: 0.75rem;
+        }
+        
+        .note-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+        }
+        
+        .note-title {
+            font-size: 1rem;
+        }
+        
+        .note-stats {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .modal-content {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+
+        .modal-btn {
+            justify-content: center;
+        }
+
+        .note-preview-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .upload-container {
+            padding: 0.75rem;
+        }
+        
+        .form-container {
+            padding: 1rem;
+        }
+        
+        .upload-title {
+            font-size: 1.5rem;
+        }
+        
+        .note-card {
+            padding: 1rem;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .recent-notes-title {
+            font-size: 1.25rem;
+        }
+
+        .modal-content {
+            padding: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+        }
+
+        .note-preview {
+            padding: 1rem;
+        }
+
+        .note-preview-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .note-preview-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+    }
+    
+    /* Dark theme adjustments */
+    [data-theme="dark"] .form-input,
+    [data-theme="dark"] .form-select,
+    [data-theme="dark"] .form-textarea,
+    [data-theme="dark"] .search-input {
+        background-color: var(--bg-tertiary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    [data-theme="dark"] .form-input::placeholder,
+    [data-theme="dark"] .form-textarea::placeholder,
+    [data-theme="dark"] .search-input::placeholder {
+        color: var(--text-secondary);
+    }
+    
+    [data-theme="dark"] .file-input-label {
+        background-color: var(--bg-tertiary);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .modal-overlay {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    /* Form validation styles */
+    .form-input.error,
+    .form-select.error,
+    .form-textarea.error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .error-message.show {
+        display: block;
+    }
+
+/* Django Messages Toast Styles */
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    max-width: 400px;
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.toast-notification.show {
+    transform: translateX(0);
+}
+
+.toast-notification.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.toast-notification.error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.toast-notification.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.toast-notification.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.toast-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block page_title %}Upload Notes{% endblock %}
+
+{% block content %}
+<!-- Django Messages Display -->
+{% if messages %}
+<div id="djangoMessages" style="display: none;">
+    {% for message in messages %}
+    <div class="django-message" data-type="{{ message.tags }}" data-message="{{ message|escapejs }}"></div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="upload-container">
+    <div class="upload-content">
+        <!-- Left Column - Form -->
+        <div class="upload-left">
+            <div class="upload-header">
+                <h1 class="upload-title">Upload Notes</h1>
+                <p class="upload-subtitle">Share educational materials with your students</p>
+            </div>
+            
+            <div class="form-container">
+                <form id="uploadForm" enctype="multipart/form-data" method="POST" action="{% url 'teacher:upload_assignment' %}">
+                    {% csrf_token %}
+
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label for="title" class="form-label">
+                            <i class="fas fa-heading" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                            Title *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="title" 
+                            name="title" 
+                            class="form-input" 
+                            placeholder="e.g., Photosynthesis Notes"
+                            required
+                        >
+                        <div class="error-message" id="title-error"></div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-file-upload" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                            Select Note File *
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input 
+                                type="file" 
+                                id="noteFile" 
+                                name="note_file" 
+                                class="file-input"
+                                accept=".pdf,.doc,.docx,.txt,.ppt,.pptx"
+                                required
+                            >
+                            <label for="noteFile" class="file-input-label" id="fileLabel">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Choose File (PDF, DOC, TXT, PPT)</span>
+                            </label>
+                        </div>
+                        <div class="error-message" id="noteFile-error"></div>
+                    </div>
+
+                    <!-- Subject -->
+                    <div class="form-group">
+                        <label for="subject" class="form-label">
+                            <i class="fas fa-book" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                            Select Subject *
+                        </label>
+                        <select id="subject" name="subject" class="form-select" required>
+                            <option value="">Choose a subject...</option>
+                            {% for sub in teacher.subject.all %} 
+                                <option value="{{sub.id}}">{{sub.name}}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="error-message" id="subject-error"></div>
+                    </div>
+
+                    <!-- Class -->
+                    <div class="form-group">
+                        <label for="class" class="form-label">
+                            <i class="fas fa-users" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                            Select Class *
+                        </label>
+                        <select id="class" name="class" class="form-select" required>
+                            <option value="">Choose a class...</option>
+                            {% for class in teacher.teacher_class.all %} 
+                            <option value="{{class.id}}"> Class : {{class.grade}}  | Sec :{{class.section}} {% if class.faculty|lower == "none" %}
+                                {% else %}
+                              |  Faculty :{{class.faculty}}
+                                {% endif %}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="error-message" id="class-error"></div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-align-left" style="margin-right: 0.5rem; color: var(--accent-color);"></i>
+                            Description *
+                        </label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            class="form-textarea" 
+                            placeholder="Add a brief description of the note or any important instructions..."
+                            required
+                        ></textarea>
+                        <div class="error-message" id="description-error"></div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">
+                            <i class="fas fa-upload" style="margin-right: 0.5rem;"></i>
+                            Upload Notes
+                        </span>
+                        <div class="loading-spinner"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Right Column - Recent Notes -->
+        <div class="upload-right">
+            <div class="recent-notes-section">
+                <div class="recent-notes-header">
+                    <h2 class="recent-notes-title">
+                        <i class="fas fa-history"></i>
+                        Recently Uploaded Notes
+                    </h2>
+                    <p class="recent-notes-subtitle">Your latest uploads</p>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Search notes by title, subject, class, or description..."
+                    >
+                    <button class="search-clear" id="searchClear" title="Clear search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Search Results Info -->
+                <div class="search-results-info" id="searchResultsInfo">
+                    <span id="searchResultsText"></span>
+                </div>
+
+                <!-- No Results Message -->
+                <div class="no-results" id="noResults">
+                    <i class="fas fa-search"></i>
+                    <h3>No notes found</h3>
+                    <p>Try adjusting your search terms or browse all available notes.</p>
+                </div>
+                
+                <!-- Empty State for No Assignments -->
+                {% if not assignments %}
+                <div class="empty-state">
+                    <i class="fas fa-file-upload"></i>
+                    <h3>Upload your first assignments today</h3>
+                    <p>Start sharing educational materials with your students. Upload notes, assignments, and resources to help them learn better.</p>
+                </div>
+                {% else %}
+                <div class="recent-notes-grid" id="recentNotesGrid">
+                    <!-- Note Cards -->
+                     
+                    {% for assignment in assignments %}  
+                    <div class="note-card" 
+                         data-title="{{ assignment.title|escapejs }}" 
+                         data-subject="{{ assignment.subject.name|escapejs }}" 
+                         data-class="{{ assignment.classs.grade }}" 
+                         data-description="{{ assignment.content|escapejs }}" 
+                         data-id="{{ assignment.id }}"
+                         data-meta="{{ assignment.subject.name|escapejs }} • Grade: {{ assignment.classs.grade }} | Section: {{ assignment.classs.section }}{% if assignment.classs.faculty|lower != 'none' %} | Faculty: {{ assignment.classs.faculty|escapejs }}{% endif %}"
+                         data-download-url="{% if assignment.pdf_file %}{{ assignment.pdf_file.url }}{% endif %}">
+                        <div class="note-card-header">
+                            <div class="note-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="note-info">
+                                <h3 class="note-title">{{assignment.title}}</h3>
+                                <p class="note-meta">{{assignment.subject}} • Grade: {{assignment.classs.grade}} | Section: {{assignment.classs.section}} {% if assignment.classs.faculty|lower != "none" %}| Faculty: {{assignment.classs.faculty}}{% endif %}</p>
+                            </div>
+                            <div class="note-actions">
+                                <button class="action-btn view-btn" title="View" data-note-id="{{assignment.id}}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% if assignment.pdf_file %} 
+                                <a href="{{assignment.pdf_file.url}}" download>
+                                    <button class="action-btn download-btn" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="note-description">
+                           {{assignment.content}}
+                        </div>
+                        <div class="note-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-download"></i>
+                                {% if assignment.pdf_file %}
+                                    <span>{{ assignment.pdf_file.size|filesizeformat }}</span>
+                                {% else %}
+                                    <span>Not Downloadable</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="deleteNoteForm" method="POST" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="assignment_id" id="assignmentIdInput">
+</form>
+
+<!-- Note Preview Modal -->
+<div class="modal-overlay" id="noteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-file-alt"></i>
+                Note Details
+            </h2>
+            <button class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="note-preview" id="notePreview">
+           
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-secondary" id="downloadNoteBtn">
+                 <i class="fas fa-eye"></i>
+                View
+            </button>
+            <button class="modal-btn modal-btn-danger" id="deleteNoteBtn">
+                <i class="fas fa-trash"></i>
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Confirm Delete
+            </h2>
+            <button class="modal-close" id="deleteModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="confirm-dialog">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="confirm-title">Delete Note?</h3>
+                <p class="confirm-message">
+                    Are you sure you want to delete "<span id="deleteNoteName"></span>"? 
+                    This action cannot be undone and the note will be permanently removed.
+                </p>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-secondary" id="cancelDeleteBtn">
+                <i class="fas fa-times"></i>
+                Cancel
+            </button>
+            <button class="modal-btn modal-btn-danger" id="confirmDeleteBtn">
+                <i class="fas fa-trash"></i>
+                Delete Note
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle Django Messages
+    function showDjangoMessages() {
+        const messagesContainer = document.getElementById('djangoMessages');
+        if (messagesContainer) {
+            const messages = messagesContainer.querySelectorAll('.django-message');
+            messages.forEach((messageEl, index) => {
+                const messageType = messageEl.dataset.type || 'info';
+                const messageText = messageEl.dataset.message || '';
+                
+                // Delay each message slightly if there are multiple
+                setTimeout(() => {
+                    showToastNotification(messageText, messageType);
+                }, index * 500);
+            });
+        }
+    }
+
+    // Enhanced Toast Notification Function
+    function showToastNotification(message, type = 'success') {
+        // Remove any existing toast
+        const existingToast = document.querySelector('.toast-notification');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        
+        // Get appropriate icon based on type
+        let icon = '';
+        switch(type) {
+            case 'success':
+                icon = 'fas fa-check-circle';
+                break;
+            case 'error':
+                icon = 'fas fa-exclamation-circle';
+                break;
+            case 'warning':
+                icon = 'fas fa-exclamation-triangle';
+                break;
+            case 'info':
+                icon = 'fas fa-info-circle';
+                break;
+            default:
+                icon = 'fas fa-check-circle';
+        }
+
+        toast.innerHTML = `
+            <i class="toast-icon ${icon}"></i>
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        // Add to page
+        document.body.appendChild(toast);
+
+        // Show toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            if (toast && toast.parentElement) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast && toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    // Show Django messages on page load
+    showDjangoMessages();
+
+    // Update the existing showToast function to use the new enhanced version
+    window.showToast = showToastNotification;
+
+    // Rest of your existing JavaScript code continues here...
+    const form = document.getElementById('uploadForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const fileInput = document.getElementById('noteFile');
+    const fileLabel = document.getElementById('fileLabel');
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchClear = document.getElementById('searchClear');
+    const searchResultsInfo = document.getElementById('searchResultsInfo');
+    const searchResultsText = document.getElementById('searchResultsText');
+    const noResults = document.getElementById('noResults');
+    let noteCards = document.querySelectorAll('.note-card');
+    
+    // Modal elements
+    const noteModal = document.getElementById('noteModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const modalClose = document.getElementById('modalClose');
+    const deleteModalClose = document.getElementById('deleteModalClose');
+    const notePreview = document.getElementById('notePreview');
+    const downloadNoteBtn = document.getElementById('downloadNoteBtn');
+    const deleteNoteBtn = document.getElementById('deleteNoteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const deleteNoteName = document.getElementById('deleteNoteName');
+    
+    let currentNoteData = null;
+    let currentNoteElement = null;
+    
+    // File input handling
+    fileInput.addEventListener('change', function() {
+        const fileName = this.files[0]?.name;
+        if (fileName) {
+            fileLabel.classList.add('has-file');
+            fileLabel.innerHTML = `
+                <i class="fas fa-file-check"></i>
+                <span>${fileName}</span>
+            `;
+        } else {
+            fileLabel.classList.remove('has-file');
+            fileLabel.innerHTML = `
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Choose File (PDF, DOC, TXT, PPT)</span>
+            `;
+        }
+    });
+    
+    // Search functionality
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        if (searchTerm === '') {
+            // Show all cards
+            noteCards.forEach(card => {
+                card.classList.remove('hidden');
+                visibleCount++;
+            });
+            searchResultsInfo.classList.remove('show');
+            noResults.classList.remove('show');
+            searchClear.classList.remove('show');
+        } else {
+            // Filter cards
+            noteCards.forEach(card => {
+                const title = card.dataset.title?.toLowerCase() || '';
+                const subject = card.dataset.subject?.toLowerCase() || '';
+                const className = card.dataset.class?.toLowerCase() || '';
+                const description = card.dataset.description?.toLowerCase() || '';
+                
+                const matches = title.includes(searchTerm) || 
+                               subject.includes(searchTerm) || 
+                               className.includes(searchTerm) || 
+                               description.includes(searchTerm);
+                
+                if (matches) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            // Show/hide results info and no results message
+            if (visibleCount > 0) {
+                searchResultsText.textContent = `Found ${visibleCount} note${visibleCount !== 1 ? 's' : ''} matching "${searchInput.value}"`;
+                searchResultsInfo.classList.add('show');
+                noResults.classList.remove('show');
+            } else {
+                searchResultsInfo.classList.remove('show');
+                noResults.classList.add('show');
+            }
+            
+            searchClear.classList.add('show');
+        }
+    }
+    
+    // Search input event listeners
+    searchInput.addEventListener('input', performSearch);
+    
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            clearSearch();
+        }
+    });
+    
+    // Clear search functionality
+    function clearSearch() {
+        searchInput.value = '';
+        performSearch();
+        searchInput.focus();
+    }
+    
+    searchClear.addEventListener('click', clearSearch);
+    
+    // Modal functionality - FIXED VERSION
+    function openNoteModal(noteElement) {
+        console.log('Opening modal for:', noteElement);
+        currentNoteElement = noteElement;
+        
+        // Extract note data from data attributes
+        const title = noteElement.dataset.title || 'Untitled';
+        const subject = noteElement.dataset.subject || 'Unknown Subject';
+        const className = noteElement.dataset.class || 'Unknown Class';
+        const description = noteElement.dataset.description || 'No description available';
+        const meta = noteElement.dataset.meta || '';
+        const downloadUrl = noteElement.dataset.downloadUrl || '';
+        const noteIcon = noteElement.querySelector('.note-icon i')?.className || 'fas fa-file-alt';
+        
+        currentNoteData = {
+            title,
+            subject,
+            class: className,
+            description,
+            icon: noteIcon,
+            meta,
+            downloadUrl
+        };
+        
+        console.log('Note data:', currentNoteData);
+        
+        // Populate modal content
+        notePreview.innerHTML = `
+            <div class="note-preview-header">
+                <div class="note-preview-icon ${getIconBackgroundClass(noteIcon)}">
+                    <i class="${noteIcon}"></i>
+                </div>
+                <div class="note-preview-info">
+                    <h3>${title}</h3>
+                    <p>${meta}</p>
+                </div>
+            </div>
+            <div class="note-preview-description">
+                ${description}
+            </div>
+            <div class="note-preview-stats">
+                <div class="preview-stat">
+                    <div class="preview-stat-value">${downloadUrl ? 'Available' : 'Not Available'}</div>
+                    <div class="preview-stat-label">Download</div>
+                </div>
+                <div class="preview-stat">
+                    <div class="preview-stat-value">PDF</div>
+                    <div class="preview-stat-label">Format</div>
+                </div>
+            </div>
+        `;
+        
+        // Update download button
+        if (downloadUrl) {
+            downloadNoteBtn.onclick = function() {
+                window.open(downloadUrl, '_blank');
+            };
+            downloadNoteBtn.style.display = 'flex';
+        } else {
+            downloadNoteBtn.style.display = 'none';
+        }
+        
+        // Show modal
+        noteModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        console.log('Modal should be visible now');
+    }
+    
+    function closeNoteModal() {
+        noteModal.classList.remove('show');
+        document.body.style.overflow = '';
+        currentNoteData = null;
+        currentNoteElement = null;
+    }
+    
+    function openDeleteModal() {
+        if (currentNoteData) {
+            deleteNoteName.textContent = currentNoteData.title;
+            deleteModal.classList.add('show');
+        }
+    }
+    
+    function closeDeleteModal() {
+        deleteModal.classList.remove('show');
+    }
+
+    function deleteNote() {
+        console.log("currentNoteElement:", currentNoteElement);
+        if (currentNoteElement) {
+            console.log("dataset:", currentNoteElement.dataset);
+            const assignmentId = currentNoteElement.dataset.id;
+            console.log("Assignment ID:", assignmentId);
+
+            if (!assignmentId) {
+                console.error("assignmentId is undefined or empty!");
+                return;  
+            }
+
+            const input = document.getElementById("assignmentIdInput");
+            input.value = assignmentId;
+            console.log("Input value before submit:", input.value);
+
+            document.getElementById("deleteNoteForm").submit();
+        } else {
+            console.error("currentNoteElement is not set!");
+        }
+    }
+    
+    function getIconBackgroundClass(iconClass) {
+        // Return the appropriate background class based on icon
+        return 'note-icon';
+    }
+    
+    // Modal event listeners
+    modalClose.addEventListener('click', closeNoteModal);
+    deleteModalClose.addEventListener('click', closeDeleteModal);
+    cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+    deleteNoteBtn.addEventListener('click', openDeleteModal);
+    confirmDeleteBtn.addEventListener('click', deleteNote);
+    
+    // Close modals when clicking overlay
+    noteModal.addEventListener('click', function(e) {
+        if (e.target === noteModal) {
+            closeNoteModal();
+        }
+    });
+    
+    deleteModal.addEventListener('click', function(e) {
+        if (e.target === deleteModal) {
+            closeDeleteModal();
+        }
+    });
+    
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (deleteModal.classList.contains('show')) {
+                closeDeleteModal();
+            } else if (noteModal.classList.contains('show')) {
+                closeNoteModal();
+            }
+        }
+    });
+    
+    // Form validation function
+    // Form validation function - IMPROVED VERSION
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = [
+            { id: 'title', message: 'Please enter a title' },
+            { id: 'noteFile', message: 'Please select a file' },
+            { id: 'subject', message: 'Please select a subject' },
+            { id: 'class', message: 'Please select a class' },
+            { id: 'description', message: 'Please enter a description' }
+        ];
+        
+        console.log('Starting form validation...');
+        
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(error => {
+            error.classList.remove('show');
+        });
+        document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(field => {
+            field.classList.remove('error');
+        });
+        
+        requiredFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            const errorElement = document.getElementById(field.id + '-error');
+        
+            console.log(`Validating ${field.id}:`, element?.value);
+        
+            if (!element) {
+                console.error(`Element with id ${field.id} not found`);
+                return;
+            }
+        
+            let fieldValue = '';
+            if (field.id === 'noteFile') {
+                fieldValue = element.files && element.files.length > 0 ? element.files[0].name : '';
+            } else {
+                fieldValue = element.value ? element.value.trim() : '';
+            }
+        
+            if (!fieldValue) {
+                console.log(`Field ${field.id} is empty`);
+                element.classList.add('error');
+                if (errorElement) {
+                    errorElement.textContent = field.message;
+                    errorElement.classList.add('show');
+                }
+                isValid = false;
+            }
+        });
+        
+        console.log('Form validation result:', isValid);
+        return isValid;
+    }
+
+    // Form submission handling
+    // Form submission handling - FIXED VERSION
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+    
+            console.log('Submit button clicked');
+    
+            if (validateForm()) {
+                console.log('Form validation passed');
+            
+                // Show loading state
+                this.classList.add('loading');
+                this.disabled = true;
+            
+                // Submit the form programmatically
+                setTimeout(() => {
+                    console.log('Submitting form...');
+                    form.submit();
+                }, 100);
+            
+            } else {
+                console.log('Form validation failed');
+                showToastNotification('Please fill in all required fields', 'error');
+                return false;
+            }
+        });
+    }
+
+    // Also add a backup form submit handler
+    form.addEventListener('submit', function(e) {
+        console.log('Form submit event triggered');
+    
+        // Don't prevent if button is already in loading state (means validation passed)
+        if (!submitBtn.classList.contains('loading')) {
+            e.preventDefault();
+            console.log('Form submission prevented - validation not completed');
+            return false;
+        }
+    
+        console.log('Form submission allowed');
+        return true;
+    });
+    
+    // Real-time validation
+    const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            const errorElement = document.getElementById(this.id + '-error');
+            if (this.value && this.value.trim()) {
+                this.classList.remove('error');
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+            }
+        });
+    });
+
+    // FIXED: Attach event listeners to view buttons
+    function attachNoteEventListeners() {
+        // Re-query the elements to get fresh references
+        noteCards = document.querySelectorAll('.note-card');
+        const viewBtns = document.querySelectorAll('.view-btn');
+        
+        console.log('Found', viewBtns.length, 'view buttons');
+        
+        viewBtns.forEach((btn, index) => {
+            console.log('Attaching listener to button', index);
+            
+            // Remove any existing listeners
+            btn.replaceWith(btn.cloneNode(true));
+            
+            // Get the fresh reference
+            const freshBtn = document.querySelectorAll('.view-btn')[index];
+            
+            freshBtn.addEventListener('click', function(e) {
+                console.log('View button clicked!', e);
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const noteCard = this.closest('.note-card');
+                console.log('Found note card:', noteCard);
+                
+                if (noteCard) {
+                    openNoteModal(noteCard);
+                } else {
+                    console.error('Could not find note card parent');
+                }
+            });
+        });
+    }
+    
+    // Initial attachment of event listeners
+    attachNoteEventListeners();
+
+    // Re-attach listeners after any dynamic content changes
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                attachNoteEventListeners();
+            }
+        });
+    });
+
+    const notesGrid = document.getElementById('recentNotesGrid');
+    if (notesGrid) {
+        observer.observe(notesGrid, { childList: true, subtree: true });
+    }
+
+    // View all notes button
+    const viewAllBtn = document.querySelector('.view-all-btn');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', function() {
+            // Add navigation logic here
+        });
+    }
+
+    function getFileIcon(fileName) {
+        const extension = fileName.split('.').pop().toLowerCase();
+        switch (extension) {
+            case 'pdf': return 'fas fa-file-pdf';
+            case 'doc':
+            case 'docx': return 'fas fa-file-word';
+            case 'ppt':
+            case 'pptx': return 'fas fa-file-powerpoint';
+            default: return 'fas fa-file-alt';
+        }
+    }
+
+    function getFileType(fileName) {
+        const extension = fileName.split('.').pop().toUpperCase();
+        return extension;
+    }
+});
+</script>
+{% endblock %}

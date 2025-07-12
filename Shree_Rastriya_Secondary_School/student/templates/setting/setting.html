@@ -1,0 +1,1072 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Settings - Student Portal{% endblock %}
+
+{% block header_title %}Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Modern Settings UI - Pure CSS */
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: var(--bg-primary);
+        min-height: calc(100vh - 120px);
+    }
+    
+    .settings-header {
+        margin-bottom: 3rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .settings-header::after {
+        content: '';
+        position: absolute;
+        bottom: -1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(135deg, var(--accent-color), #4dabf7);
+        border-radius: 2px;
+    }
+    
+    .settings-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        background: linear-gradient(135deg, var(--accent-color), #4dabf7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .settings-section {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .settings-section:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    .section-header {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .section-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, var(--accent-color), #4dabf7);
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-icon {
+        width: 24px;
+        height: 24px;
+        color: var(--accent-color);
+    }
+    
+    .section-content {
+        padding: 2rem;
+    }
+    
+    /* Form Styling */
+    .form-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 4px rgba(42, 123, 237, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    .form-input::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .input-group {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+    }
+    
+    .input-group .form-input {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: none;
+    }
+    
+    .input-addon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1rem;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-left: none;
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .input-addon:hover {
+        background: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+    }
+    
+    .input-addon.copy-btn {
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .input-addon.copy-btn:active {
+        transform: scale(0.95);
+    }
+    
+    .form-input:read-only {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+    
+    /* Copy to clipboard styling */
+    .copyable-input {
+        cursor: pointer;
+    }
+    
+    .copyable-input:hover {
+        background: var(--bg-tertiary) !important;
+    }
+    
+    /* Password form specific styles */
+    .password-form {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .password-requirements {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .requirement {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .requirement:last-child {
+        margin-bottom: 0;
+    }
+    
+    .requirement.valid {
+        color: var(--success-color, #10b981);
+    }
+    
+    .requirement.invalid {
+        color: var(--danger-color, #ef4444);
+    }
+    
+    .requirement-icon {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .requirement.valid .requirement-icon {
+        background: var(--success-color, #10b981);
+        color: white;
+    }
+    
+    .requirement.invalid .requirement-icon {
+        background: var(--danger-color, #ef4444);
+        color: white;
+    }
+    
+    /* Toggle Switch */
+    .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 32px;
+        background: var(--bg-tertiary);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid var(--border-color);
+    }
+    
+    .toggle-switch.checked {
+        background: linear-gradient(135deg, var(--accent-color), #4dabf7);
+        border-color: var(--accent-color);
+    }
+    
+    .toggle-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .toggle-switch.checked .toggle-knob {
+        transform: translateX(28px);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .toggle-switch input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+    
+    /* Setting Item */
+    .setting-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+    
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+    
+    .setting-item:hover {
+        background: var(--bg-secondary);
+        margin: 0 -2rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        border-radius: 8px;
+    }
+    
+    .setting-info {
+        flex: 1;
+    }
+    
+    .setting-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+    }
+    
+    .setting-description {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.4;
+    }
+    
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn:hover::before {
+        left: 100%;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-color), #4dabf7);
+        color: white;
+        box-shadow: 0 4px 15px rgba(42, 123, 237, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(42, 123, 237, 0.4);
+    }
+    
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger-color), #f87171);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-container {
+        display: flex;
+        justify-content: center;
+        padding-top: 1rem;
+    }
+    
+    /* Error states */
+    .form-input.error {
+        border-color: var(--danger-color, #ef4444);
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    .error-message {
+        color: var(--danger-color, #ef4444);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .settings-container {
+            padding: 1rem;
+        }
+        
+        .settings-title {
+            font-size: 2rem;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        .setting-item:hover {
+            margin: 0 -1.5rem;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .settings-container {
+            padding: 0.5rem;
+        }
+        
+        .settings-title {
+            font-size: 1.75rem;
+        }
+        
+        .section-content {
+            padding: 1rem;
+        }
+        
+        .form-input {
+            padding: 0.875rem 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Animation for form validation */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    /* Loading state */
+    .btn.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+    
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--accent-color);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 1000;
+        transform: translateY(100px);
+        transition: transform 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .toast.success {
+        background: var(--success-color, #10b981);
+    }
+    
+    .toast.error {
+        background: var(--danger-color, #ef4444);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <header class="settings-header">
+        <h1 class="settings-title">Settings</h1>
+    </header>
+
+    <!-- Profile Information Section -->
+    <section class="settings-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Profile Information
+            </h2>
+        </div>
+        
+        <div class="section-content">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <div class="input-group">
+                        <input
+                            name="name"
+                            class="form-input"
+                            value="{{ student.first_name|default:'N/A'|title }} {{student.last_name|default:'N/A'|title}}"
+                            readonly
+                        />
+                        <div class="input-addon">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Student Code</label>
+                    <div class="input-group">
+                        <input
+                            id="studentCodeInput"
+                            name="student_code"
+                            class="form-input copyable-input"
+                            value="{{ student.student_code|default:'' }}"
+                            readonly
+                            title="Click to copy student code"
+                        />
+                        <div class="input-addon copy-btn" id="copyStudentCode" title="Copy to clipboard">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Class</label>
+                    <div class="input-group">
+                        <input
+                            name="class_year"
+                            class="form-input"
+                            value="Grade: {{student.student_class.grade}} | Section: {{student.student_class.section}} {% if student.student_class.faculty|lower != 'none' %}| Faculty: {{student.student_class.faculty}}{% endif %}"
+                            readonly
+                        />
+                        <div class="input-addon">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Change Password Section -->
+    <section class="settings-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                </svg>
+                Change Password
+            </h2>
+        </div>
+        
+        <div class="section-content">
+            <form id="passwordForm" class="password-form" method="post" action="">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="currentPassword">Current Password</label>
+                    <input
+                        type="password"
+                        id="currentPassword"
+                        name="current_password"
+                        class="form-input"
+                        placeholder="Enter your current password"
+                        required
+                    />
+                    <div class="error-message" id="currentPasswordError" style="display: none;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="newPassword">New Password</label>
+                    <input
+                        type="password"
+                        id="newPassword"
+                        name="new_password"
+                        class="form-input"
+                        placeholder="Enter your new password"
+                        required
+                    />
+                    <div class="password-requirements">
+                        <div class="requirement" id="lengthReq">
+                            <span class="requirement-icon">✗</span>
+                            At least 8 characters long
+                        </div>
+                        <div class="requirement" id="uppercaseReq">
+                            <span class="requirement-icon">✗</span>
+                            Contains uppercase letter
+                        </div>
+                        <div class="requirement" id="lowercaseReq">
+                            <span class="requirement-icon">✗</span>
+                            Contains lowercase letter
+                        </div>
+                        <div class="requirement" id="numberReq">
+                            <span class="requirement-icon">✗</span>
+                            Contains number
+                        </div>
+                    </div>
+                    <div class="error-message" id="newPasswordError" style="display: none;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirm_password"
+                        class="form-input"
+                        placeholder="Confirm your new password"
+                        required
+                    />
+                    <div class="error-message" id="confirmPasswordError" style="display: none;"></div>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+
+
+    <!-- Theme Settings Section -->
+    <section class="settings-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                Theme Settings
+            </h2>
+        </div>
+        
+        <div class="section-content">
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3 class="setting-title">Dark Mode</h3>
+                    <p class="setting-description">Switch between light and dark theme</p>
+                </div>
+                <label class="toggle-switch" id="darkModeToggle">
+                    <input type="checkbox" name="dark_mode" />
+                    <div class="toggle-knob"></div>
+                </label>
+            </div>
+        </div>
+    </section>
+
+    <!-- Privacy & Security Section -->
+    <section class="settings-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           
+                </svg>
+                Privacy & Security
+            </h2>
+        </div>
+        
+        <div class="section-content">
+            <div class="btn-container">
+                <a href="{% url "student:std_logout" %}">
+                <button class="btn btn-danger">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                </button>
+            </a>
+            </div>
+        </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy to clipboard functionality
+    const copyStudentCodeBtn = document.getElementById('copyStudentCode');
+    const studentCodeInput = document.getElementById('studentCodeInput');
+    
+    // Make student code input clickable for copying
+    if (studentCodeInput) {
+        studentCodeInput.addEventListener('click', function() {
+            copyToClipboard(this.value, 'Student code copied to clipboard!');
+        });
+    }
+    
+    // Copy button functionality
+    if (copyStudentCodeBtn) {
+        copyStudentCodeBtn.addEventListener('click', function() {
+            const studentCode = studentCodeInput.value;
+            copyToClipboard(studentCode, 'Student code copied to clipboard!');
+        });
+    }
+    
+    // Copy to clipboard function
+    function copyToClipboard(text, successMessage) {
+        if (navigator.clipboard && window.isSecureContext) {
+            // Use modern clipboard API
+            navigator.clipboard.writeText(text).then(function() {
+                showToast(successMessage, 'success');
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+                fallbackCopyTextToClipboard(text, successMessage);
+            });
+        } else {
+            // Fallback for older browsers
+            fallbackCopyTextToClipboard(text, successMessage);
+        }
+    }
+    
+    // Fallback copy function
+    function fallbackCopyTextToClipboard(text, successMessage) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showToast(successMessage, 'success');
+            } else {
+                showToast('Failed to copy to clipboard', 'error');
+            }
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+            showToast('Failed to copy to clipboard', 'error');
+        }
+        
+        document.body.removeChild(textArea);
+    }
+    
+    // Password form validation
+    const passwordForm = document.getElementById('passwordForm');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const currentPasswordInput = document.getElementById('currentPassword');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    
+    // Password requirements elements
+    const lengthReq = document.getElementById('lengthReq');
+    const uppercaseReq = document.getElementById('uppercaseReq');
+    const lowercaseReq = document.getElementById('lowercaseReq');
+    const numberReq = document.getElementById('numberReq');
+    
+    // Password validation functions
+    function validatePassword(password) {
+        const requirements = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /\d/.test(password)
+        };
+        
+        return requirements;
+    }
+    
+    function updateRequirement(element, isValid) {
+        const icon = element.querySelector('.requirement-icon');
+        if (isValid) {
+            element.classList.add('valid');
+            element.classList.remove('invalid');
+            icon.textContent = '✓';
+        } else {
+            element.classList.add('invalid');
+            element.classList.remove('valid');
+            icon.textContent = '✗';
+        }
+    }
+    
+    function updatePasswordRequirements(password) {
+        const requirements = validatePassword(password);
+        
+        updateRequirement(lengthReq, requirements.length);
+        updateRequirement(uppercaseReq, requirements.uppercase);
+        updateRequirement(lowercaseReq, requirements.lowercase);
+        updateRequirement(numberReq, requirements.number);
+        
+        return Object.values(requirements).every(req => req);
+    }
+    
+    function showError(inputElement, errorElement, message) {
+        inputElement.classList.add('error');
+        errorElement.textContent = message;
+        errorElement.style.display = 'flex';
+    }
+    
+    function hideError(inputElement, errorElement) {
+        inputElement.classList.remove('error');
+        errorElement.style.display = 'none';
+    }
+    
+    // Real-time password validation
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', function() {
+            const password = this.value;
+            const isValid = updatePasswordRequirements(password);
+            const errorElement = document.getElementById('newPasswordError');
+            
+            if (password && !isValid) {
+                showError(this, errorElement, 'Password does not meet all requirements');
+            } else {
+                hideError(this, errorElement);
+            }
+            
+            // Also validate confirm password if it has a value
+            if (confirmPasswordInput.value) {
+                validateConfirmPassword();
+            }
+        });
+    }
+    
+    function validateConfirmPassword() {
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const errorElement = document.getElementById('confirmPasswordError');
+        
+        if (confirmPassword && newPassword !== confirmPassword) {
+            showError(confirmPasswordInput, errorElement, 'Passwords do not match');
+            return false;
+        } else {
+            hideError(confirmPasswordInput, errorElement);
+            return true;
+        }
+    }
+    
+    // Confirm password validation
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+    }
+    
+    // Form submission
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = currentPasswordInput.value;
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            // Clear previous errors
+            hideError(currentPasswordInput, document.getElementById('currentPasswordError'));
+            hideError(newPasswordInput, document.getElementById('newPasswordError'));
+            hideError(confirmPasswordInput, document.getElementById('confirmPasswordError'));
+            
+            let isValid = true;
+            
+            // Validate current password
+            if (!currentPassword) {
+                showError(currentPasswordInput, document.getElementById('currentPasswordError'), 'Current password is required');
+                isValid = false;
+            }
+            
+            // Validate new password
+            if (!newPassword) {
+                showError(newPasswordInput, document.getElementById('newPasswordError'), 'New password is required');
+                isValid = false;
+            } else if (!updatePasswordRequirements(newPassword)) {
+                showError(newPasswordInput, document.getElementById('newPasswordError'), 'Password does not meet all requirements');
+                isValid = false;
+            }
+            
+            // Validate confirm password
+            if (!confirmPassword) {
+                showError(confirmPasswordInput, document.getElementById('confirmPasswordError'), 'Please confirm your new password');
+                isValid = false;
+            } else if (!validateConfirmPassword()) {
+                isValid = false;
+            }
+            
+            // Check if new password is same as current
+            if (currentPassword && newPassword && currentPassword === newPassword) {
+                showError(newPasswordInput, document.getElementById('newPasswordError'), 'New password must be different from current password');
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Show loading state
+                changePasswordBtn.classList.add('loading');
+                changePasswordBtn.textContent = 'Updating...';
+                
+                // Submit the form
+                this.submit();
+            }
+        });
+    }
+    
+    // Initialize toggle switches
+    const toggles = document.querySelectorAll('.toggle-switch');
+    
+    toggles.forEach(toggle => {
+        const checkbox = toggle.querySelector('input[type="checkbox"]');
+        
+        // Set initial state
+        if (checkbox.checked) {
+            toggle.classList.add('checked');
+        }
+        
+        // Handle toggle clicks
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                toggle.classList.add('checked');
+            } else {
+                toggle.classList.remove('checked');
+            }
+            
+            // Add haptic feedback (if supported)
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
+            // Handle specific toggle actions
+            if (checkbox.name === 'dark_mode') {
+                handleDarkModeToggle(checkbox.checked);
+            } else if (checkbox.name === 'email_notifications') {
+                handleSettingUpdate(checkbox.name, checkbox.checked);
+            }
+        });
+    });
+    
+    // Initialize dark mode toggle based on current theme
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        const checkbox = darkModeToggle.querySelector('input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme') || localStorage.getItem('dashboard-theme') || 'light';
+        
+        if (currentTheme === 'dark') {
+            checkbox.checked = true;
+            darkModeToggle.classList.add('checked');
+        }
+    }
+    
+    function handleDarkModeToggle(enabled) {
+        console.log('🌙 Theme toggle clicked:', enabled ? 'dark' : 'light');
+        
+        // Use the unified theme system if available
+        if (window.UnifiedTheme) {
+            window.UnifiedTheme.applyTheme(enabled ? 'dark' : 'light');
+        } else {
+            // Fallback method
+            const theme = enabled ? 'dark' : 'light';
+            
+            if (enabled) {
+                document.documentElement.classList.add('dark-theme');
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.body.classList.add('dark-theme');
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.body.classList.remove('dark-theme');
+            }
+            
+            // Save to both storage keys
+            localStorage.setItem('theme', theme);
+            localStorage.setItem('dashboard-theme', theme);
+            
+            // Dispatch event for other scripts
+            window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
+        }
+        
+        // Show visual feedback
+        showToast(enabled ? 'Dark mode enabled' : 'Light mode enabled', 'success');
+    }
+    
+    function handleSettingUpdate(settingName, value) {
+        console.log('📧 Setting updated:', settingName, value);
+        showToast('Setting updated successfully', 'success');
+        // You can add AJAX call here to save to backend
+    }
+    
+    function showToast(message, type = 'success') {
+        // Remove existing toasts
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+        
+        // Create toast notification
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.style.transform = 'translateY(0)', 100);
+        setTimeout(() => {
+            toast.style.transform = 'translateY(100px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    // Listen for theme changes from other parts of the app
+    window.addEventListener('themeChanged', function(e) {
+        console.log('🔄 Theme change detected in settings:', e.detail.theme);
+        
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            const checkbox = darkModeToggle.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = e.detail.theme === 'dark';
+                if (e.detail.theme === 'dark') {
+                    darkModeToggle.classList.add('checked');
+                } else {
+                    darkModeToggle.classList.remove('checked');
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

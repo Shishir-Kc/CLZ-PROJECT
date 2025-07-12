@@ -1,0 +1,1363 @@
+{% extends "Base/base.html" %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{title|default:"N/A"}}{% endblock title %}</title>
+    {% block links %}  
+    <!-- Google Fonts - Premium font combinations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    {% endblock links %}
+</head>
+
+{% block content %} 
+
+<body>
+  <style>
+    /* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  color: #101518;
+  background-color: #f9f9f9;
+  overflow-x: hidden;
+}
+
+/* Typography Hierarchy */
+h1, .hero-content h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+}
+
+h2, .content-section h2 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
+h3, .title, .headline {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+p, .description, body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+
+.category {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+/* Header styles - Always visible */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #eaedf1;
+  height: 60px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  border-radius: 50%;
+  color: white;
+  font-size: 1rem;
+}
+
+header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Desktop Navigation */
+.desktop-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.desktop-nav a {
+  color: #101518;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.desktop-nav a:hover {
+  color: #2563EB;
+  background-color: rgba(37, 99, 235, 0.1);
+  transform: translateY(-1px);
+}
+
+.desktop-nav a i {
+  font-size: 0.75rem;
+}
+
+/* Mobile Menu Toggle - Custom Hamburger */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 2rem;
+  height: 2rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+  transition: all 0.3s ease;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 3px;
+  background-color: #101518;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-bottom: 1px solid #eaedf1;
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+  padding: 0.5rem;
+  gap: 0.25rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.mobile-nav.active {
+  display: flex !important;
+}
+
+.mobile-nav a {
+  color: #101518;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mobile-nav a:hover {
+  background-color: #f3f4f6;
+  color: #2563EB;
+  transform: translateX(5px);
+}
+
+.mobile-nav a i {
+  font-size: 1rem;
+  width: 1.25rem;
+}
+
+/* Main content */
+main {
+  margin-top: 60px;
+}
+
+/* Hero Section - Full Screen with Slideshow */
+.hero-section {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -60px;
+  overflow: hidden;
+}
+
+.hero-slideshow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%);
+  z-index: 1;
+}
+
+.hero-slide.active {
+  opacity: 1;
+}
+
+.hero-content {
+  text-align: center;
+  max-width: 900px;
+  padding: 1rem;
+  z-index: 2;
+  position: relative;
+}
+
+.hero-content h1 {
+  color: white;
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 0.8rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  font-family: 'Playfair Display', serif;
+}
+
+.hero-content h2 {
+  color: white;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-weight: 400;
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  font-family: 'Inter', sans-serif;
+}
+
+.explore-btn {
+  padding: 0.8rem 1.6rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.explore-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* Slideshow Indicators */
+.slideshow-indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background-color: white;
+  transform: scale(1.2);
+}
+
+.indicator:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Content Sections */
+.content-section {
+  width: 100vw;
+  padding: 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 1.5rem;
+}
+
+.content-section h2 {
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.content-section h2 i {
+  color: #2563EB;
+}
+
+.content-section p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Quick Access Grid */
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.quick-access-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.quick-access-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.image-container {
+  width: 100%;
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.8rem;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.title i {
+  color: #2563EB;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #5c748a;
+  text-align: center;
+  line-height: 1.4;
+  font-family: 'Inter', sans-serif;
+}
+
+/* News and Events */
+.news-item, .event-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  margin-top: 2rem;
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.news-content, .event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.category {
+  font-size: 0.8rem;
+  color: #2563EB;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.headline {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-family: 'Poppins', sans-serif;
+}
+
+.news-image, .event-image {
+  height: 250px;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.news-image img, .event-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.gallery-item {
+  height: 250px;
+  border-radius: 0.8rem;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.gallery-item:hover {
+  transform: scale(1.03);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Achievements */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.achievement-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.5rem;
+  color: blue;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.achievement-item:hover {
+  transform: translateY(-3px);
+}
+
+.achievement-title {
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.achievement-count {
+  font-size: 2.5rem;
+  color: green;
+  font-weight: 900;
+  font-family: 'Playfair Display', serif;
+}
+
+/* Contact */
+.map-container {
+  width: 100%;
+  height: 300px;
+  border-radius: 0.8rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.map-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Footer */
+footer {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: white;
+  padding: 1.5rem 0;
+  width: 100vw;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-links a {
+  color: #d1d5db;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.footer-links a:hover {
+  color: white;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-links a {
+  color: #d1d5db;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.social-links a:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+footer p {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+  
+  .header-actions .apply-btn {
+    display: none;
+  }
+  
+  header {
+    padding: 0.4rem 0.8rem;
+    height: 55px;
+  }
+  
+  main {
+    margin-top: 55px;
+  }
+  
+  .hero-section {
+    margin-top: -55px;
+  }
+  
+  .mobile-nav {
+    top: 55px;
+  }
+  
+  .hero-content {
+    padding: 0.8rem;
+  }
+  
+  .content-section {
+    padding: 1.5rem 0;
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .quick-access-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .image-container {
+    height: 150px;
+  }
+  
+  .news-item, .event-item {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .news-image, .event-image {
+    height: 200px;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .gallery-item {
+    height: 200px;
+  }
+  
+  .achievements-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .achievement-item {
+    padding: 1rem;
+  }
+  
+  .achievement-count {
+    font-size: 2rem;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .slideshow-indicators {
+    bottom: 15px;
+  }
+  
+  .indicator {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .map-container {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 0.3rem 0.8rem;
+    height: 50px;
+  }
+  
+  main {
+    margin-top: 50px;
+  }
+  
+  .hero-section {
+    margin-top: -50px;
+  }
+  
+  .mobile-nav {
+    top: 50px;
+  }
+  
+  .logo-container h2 {
+    font-size: 0.9rem;
+  }
+  
+  .hero-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .hero-content h2 {
+    font-size: 0.8rem;
+  }
+  
+  .explore-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .content-section {
+    padding: 1rem 0;
+  }
+  
+  .quick-access-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  
+  .achievements-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+}
+  </style>
+
+    <main>
+        <!-- Hero Section with Dynamic Slideshow -->
+        <section id="home" class="hero-section">
+            <div class="hero-slideshow">
+                {% for slide in slides %}
+                <div class="hero-slide {% if forloop.first %}active{% endif %}">
+                    <img src="{{ slide.image.url }}" alt="{{ slide.title|default:'Slider Image' }}">
+                </div>
+                {% empty %}
+                <!-- Fallback if no slides are available -->
+                <div class="hero-slide active">
+                    <img src="" alt="Default Slider Image">
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="hero-content">
+                <h1>Welcome to {{title|default:"N/A"}}</h1>
+                <h2>Nurturing Excellence in Education Since 1995</h2>
+                <a href="{% url "home:academic" %}">
+                <button class="explore-btn"><i class="fas fa-compass"></i> Explore Our Facilities </button>
+                </a>
+              </div>
+            
+            <div class="slideshow-indicators">
+                {% for slide in slides %}
+                <div class="indicator {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></div>
+                {% empty %}
+                <div class="indicator active" data-slide="0"></div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Quick Access Section -->
+        <section id="academics" class="content-section">
+            <div class="container">
+                <h2><i class="fas fa-rocket"></i> Quick Access</h2>
+                <p>Explore our key areas and discover what makes our school special</p>
+                
+                <div class="quick-access-grid">
+                    {% if quick_acess_academics %}
+                   <a href="{% url 'home:academic' %}">
+                        <div class="quick-access-item">
+                        <div class="image-container">
+                        {% if quick_acess_academics.academics %}
+                         <img src="{{ quick_acess_academics.academics.url }}" alt="Academics">
+                         {% else %}
+                         <img src="" alt="Academics">
+                     {% endif %}
+                     </div>
+                        <div class="title">
+                       <i class="fas fa-book-open"></i> Academics
+                       </div>
+                        <div class="description">
+                     {{ quick_acess_academics.academics_description }}
+                      </div>
+                     </div>
+                    </a>
+                      
+                    {% endif %}
+
+                    {% if Quick_acess_admission %} 
+                    <a href="{% url 'home:admission' %}">
+                        <div class="quick-access-item">
+                            <div class="image-container">
+                                {% if  Quick_acess_admission.admission%}
+                                <img src="{{  Quick_acess_admission.admission.url }}" alt="Admissions">
+                                {% else %}
+                                <img src="" alt="Admissions">
+                                {% endif %}
+                            </div>
+                            <div class="title"><i class="fas fa-user-plus"></i> Admissions</div>
+                            <div class="description">{{Quick_acess_admission.admission_description}}</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- News Section -->
+        <section id="news" class="content-section">
+            <div class="container">
+                <h2><i class="fas fa-newspaper"></i> Latest News</h2>
+                {% for new in news %}
+                <div class="news-item">
+                    <div class="news-content">
+                        <div class="category"><i class="fas fa-tag"></i> {{ news.category|default:"School News" }}</div>
+                        <div class="headline">{{ news.title }}</div>
+                        <p>{{ new.description|truncatewords:30 }}</p>
+                    </div>
+                    <div class="news-image">
+                        {% if new.image %}
+    
+                        <img src="{{ new.image.url }}" alt="{{ new.title }}">
+                        {% else %}
+                        <img src="" alt="News Image">
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="news-item">
+                    <div class="news-content">
+                        <div class="category"><i class="fas fa-tag"></i> School News</div>
+                        <div class="headline">Annual Sports Day Celebration</div>
+                        <p>Our students showcased their athletic talents in the annual sports day event, demonstrating teamwork, sportsmanship, and competitive spirit.</p>
+                    </div>
+                    <div class="news-image">
+                        <img src="" alt="Sports Day">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="events" class="content-section">
+            <div class="container">
+                <h2><i class="fas fa-calendar-alt"></i> Upcoming Events</h2>
+                {% for event in events %}
+                <div class="event-item">
+                    <div class="event-image">
+                        {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                        {% else %}
+                        <img src="" alt="Event Image">
+                        {% endif %}
+                    </div>
+                    <div class="event-content">
+                        <div class="category"><i class="fas fa-flask"></i> {{ event.category|default:"Academic Event" }}</div>
+                        <div class="headline">{{ event.title }}</div>
+                        <p>{{ event.description|truncatewords:30 }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="event-item">
+                    <div class="event-image">
+                        <img src="" alt="Science Fair">
+                    </div>
+                    <div class="event-content">
+                        <div class="category"><i class="fas fa-flask"></i> Academic Event</div>
+                        <div class="headline">Science Fair 2024</div>
+                        <p>Students will present their innovative science projects and experiments in our annual science fair, promoting scientific thinking and creativity.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="content-section">
+            <div class="container">
+                <h2><i class="fas fa-images"></i> Photo Gallery</h2>
+                <p>Glimpses of life at our school</p>
+                <div class="gallery-grid">
+                    {% for gallery_item in gallery_images %}
+                    <div class="gallery-item">
+                        <img src="{{ gallery_item.image.url }}" alt="{{ gallery_item.title|default:'Gallery Image' }}">
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievements Section -->
+        <section id="achievements" class="content-section">
+            <div class="container">
+                <h2><i class="fas fa-trophy"></i> Our Achievements</h2>
+                <p>Celebrating our students' success and milestones</p>
+                <div class="achievements-grid">
+                    <div class="achievement-item">
+                       {% if achivement.student < 100  %}
+                        <div class="achievement-count">{{ achivement.student|default:"N/A" }}</div>
+                        {% else %}
+                         <div class="achievement-count">{{ achivement.student}} + </div>
+                        {% endif %}
+
+
+                        <div class="achievement-title"><i class="fas fa-users"></i> Students</div>
+                    </div>
+
+                    <div class="achievement-item">
+                        {% if achivement.teacher < 20  %} 
+                        <div class="achievement-count">{{ achivement.teacher|default:"N/A" }}</div>
+                        {% else %}
+                        <div class="achievement-count">{{ achivement.teacher}}+</div>
+                        {% endif %}
+
+                        <div class="achievement-title"><i class="fas fa-chalkboard-teacher"></i> Teachers</div>
+                    </div>
+
+                    <div class="achievement-item">
+                        {% if achivement.experience < 2 %} 
+                        <div class="achievement-count">{{ achivement.experience|default:"N/A" }}</div>
+                        {% else %}
+                          <div class="achievement-count">{{ achivement.experience}}+</div>
+                        {% endif %}
+
+                        <div class="achievement-title"><i class="fas fa-calendar"></i> Years of Excellence</div>
+                    </div>
+                    <div class="achievement-item">
+                        <div class="achievement-count">
+                          {% if achivement.sucess_rate < 1 %} 
+                          
+                           {{ achivement.sucess_rate|default:"N/A" }}</div>
+                          {% else %}
+                             {{ achivement.sucess_rate}}+</div>
+                          {% endif %}
+                        <div class="achievement-title"><i class="fas fa-chart-line"></i> Success Rate</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+
+    <style>
+      .map-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.map-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+</style>
+    <section id="contact" class="content-section">
+    <div class="container">
+        <h2><i class="fas fa-phone-alt"></i> Contact Us</h2>
+        <p>Get in touch with us for admissions and inquiries</p>
+        <div class="map-container">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1248.6907804214645!2d87.27042652554911!3d26.690047527061424!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef6b9af78281d3%3A0x6bc6c4de9d0fc68f!2sShree%20Rastriya%20Secondary%20School!5e0!3m2!1sen!2snp!4v1749894964011!5m2!1sen!2snp" 
+                width="100%" 
+                height="450" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                {% comment %} <a href="#about"><i class="fas fa-info"></i> About</a> {% endcomment %}
+                <a href="{% url "home:academic" %}"><i class="fas fa-book"></i> Academics</a>
+                <a href="{% url "home:admission" %}"><i class="fas fa-user-plus"></i> Admissions</a>
+                <a href="{% url "home:contact" %}"><i class="fas fa-phone"></i> Contact</a>
+                {% comment %} <a href="#privacy"><i class="fas fa-shield-alt"></i> Privacy Policy</a> {% endcomment %}
+            </div>
+            <div class="social-links">
+                <a href="https://www.facebook.com/share/g/16KnCXLYYU/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+  
+            </div>
+            <p><i class="fas fa-copyright"></i> 2024 Shree Rastriya Mavi School. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle with proper hamburger animation
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileNav = document.getElementById('mobileNav');
+            let mobileMenuOpen = false;
+
+            if (mobileMenuToggle && mobileNav) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    mobileMenuOpen = !mobileMenuOpen;
+                    
+                    if (mobileMenuOpen) {
+                        mobileNav.classList.add('active');
+                        mobileMenuToggle.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        mobileNav.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+
+                // Close mobile menu when clicking on a link
+                const mobileNavLinks = mobileNav.querySelectorAll('a');
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileNav.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuOpen = false;
+                        document.body.style.overflow = '';
+                    });
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (mobileMenuOpen && 
+                        !mobileNav.contains(event.target) && 
+                        !mobileMenuToggle.contains(event.target)) {
+                        mobileNav.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuOpen = false;
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            // Hero Slideshow Functionality
+            const slides = document.querySelectorAll('.hero-slide');
+            const indicators = document.querySelectorAll('.indicator');
+            let currentSlide = 0;
+            let slideInterval;
+ 
+//            console.log('Found slides:', slides.length);
+            //console.log('Found indicators:', indicators.length); 
+
+            // Initialize slideshow
+            function initSlideshow() {
+             //   console.log('Initializing slideshow...');
+                
+                // Clear any existing intervals
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                }
+                
+                // Ensure we have slides and indicators
+                if (slides.length === 0 || indicators.length === 0) {
+   //                 console.error('Slideshow elements not found');
+                    return;
+                }
+                
+                // Remove active class from all slides and indicators
+                slides.forEach(slide => slide.classList.remove('active'));
+                indicators.forEach(indicator => indicator.classList.remove('active'));
+                
+                // Show first slide
+                currentSlide = 0;
+                slides[0].classList.add('active');
+                indicators[0].classList.add('active');
+                
+               // console.log('First slide activated');
+                
+                // Start automatic slideshow only if there are multiple slides
+                if (slides.length > 1) {
+                    startSlideshow();
+                }
+            }
+
+            // Show specific slide
+            function showSlide(index) {
+                if (index < 0 || index >= slides.length) {
+                    return;
+                }
+                
+                {% comment %} console.log('Showing slide:', index); {% endcomment %}
+                
+                // Remove active class from all slides and indicators
+                slides.forEach(slide => slide.classList.remove('active'));
+                indicators.forEach(indicator => indicator.classList.remove('active'));
+                
+                // Add active class to current slide and indicator
+                slides[index].classList.add('active');
+                indicators[index].classList.add('active');
+                
+                currentSlide = index;
+            }
+
+            // Next slide
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            }
+
+            // Start automatic slideshow
+            function startSlideshow() {
+                slideInterval = setInterval(nextSlide, 4000); // Change every 4 seconds
+                //console.log('Slideshow started');
+            }
+
+            // Stop automatic slideshow
+            function stopSlideshow() {
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                  //  console.log('Slideshow stopped');
+                }
+            }
+
+            // Restart slideshow
+            function restartSlideshow() {
+                stopSlideshow();
+                if (slides.length > 1) {
+                    startSlideshow();
+                }
+            }
+
+            // Add click event to indicators
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', function() {
+                    showSlide(index);
+                    restartSlideshow(); // Restart timer when manually changing slides
+                });
+            });
+
+            // Pause slideshow on hover
+            const heroSection = document.querySelector('.hero-section');
+            if (heroSection) {
+                heroSection.addEventListener('mouseenter', stopSlideshow);
+                heroSection.addEventListener('mouseleave', function() {
+                    if (slides.length > 1) {
+                        startSlideshow();
+                    }
+                });
+            }
+
+            // Initialize slideshow
+            initSlideshow();
+
+            // Smooth scrolling for navigation links
+            function smoothScroll(target) {
+                const element = document.querySelector(target);
+                if (element) {
+                    const headerHeight = 60;
+                    const elementPosition = element.offsetTop - headerHeight;
+                    
+                    window.scrollTo({
+                        top: elementPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            // Add smooth scrolling to all navigation links
+            const allNavLinks = document.querySelectorAll('nav a[href^="#"], .mobile-nav a[href^="#"]');
+            allNavLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('href');
+                    smoothScroll(target);
+                });
+            });
+
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all content sections
+            const contentSections = document.querySelectorAll('.content-section');
+            contentSections.forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+
+            // Header background on scroll
+            const header = document.querySelector('header');
+            if (header) {
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY > 100) {
+                        header.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+                        header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                    } else {
+                        header.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                        header.style.boxShadow = 'none';
+                    }
+                });
+            }
+
+            // Resize handler
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768 && mobileMenuOpen) {
+                    if (mobileNav && mobileMenuToggle) {
+                        mobileNav.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuOpen = false;
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+
+            // Keyboard navigation for slideshow
+            document.addEventListener('keydown', function(e) {
+                if (slides.length > 1) {
+                    if (e.key === 'ArrowLeft') {
+                        currentSlide = currentSlide === 0 ? slides.length - 1 : currentSlide - 1;
+                        showSlide(currentSlide);
+                        restartSlideshow();
+                    } else if (e.key === 'ArrowRight') {
+                        nextSlide();
+                        restartSlideshow();
+                    }
+                }
+                
+                // Close mobile menu with Escape key
+                if (e.key === 'Escape' && mobileMenuOpen) {
+                    if (mobileNav && mobileMenuToggle) {
+                        mobileNav.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuOpen = false;
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+        });
+    </script>
+
+{% endblock content %}
+
+</body>
+</html>

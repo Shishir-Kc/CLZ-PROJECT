@@ -1,0 +1,954 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Student Dashboard{% endblock %}</title>
+
+<!-- UNIFIED THEME SYSTEM - Load immediately -->
+<script>
+(function() {
+    // Check for saved theme immediately
+    const savedTheme = localStorage.getItem('theme') || localStorage.getItem('dashboard-theme');
+    if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+        document.documentElement.setAttribute('data-theme', 'dark');
+
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?display=swap&family=Lexend:wght@400;500;700;900&family=Noto+Sans:wght@400;500;700;900">
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- LOAD YOUR ORIGINAL CSS FIRST -->
+<link rel="stylesheet" href="{% static 'student/css/dashboard.css' %}">
+
+<style>
+/* UNIFIED THEME SYSTEM - CSS Variables */
+:root {
+    --mobile-bg: #ffffff;
+    --mobile-text: #333333;
+    --mobile-text-secondary: #666666;
+    --mobile-border: #dddddd;
+    --mobile-hover: #f0f0f0;
+    --mobile-accent: #007bff;
+    --mobile-shadow: rgba(0,0,0,0.1);
+    --mobile-overlay: rgba(0,0,0,0.5);
+}
+
+.dark-theme,
+[data-theme="dark"] {
+    --mobile-bg: #1a1a1a;
+    --mobile-text: #ffffff;
+    --mobile-text-secondary: #cccccc;
+    --mobile-border: #333333;
+    --mobile-hover: #2a2a2a;
+    --mobile-accent: #4dabf7;
+    --mobile-shadow: rgba(0,0,0,0.3);
+    --mobile-overlay: rgba(0,0,0,0.7);
+}
+
+@media (max-width: 768px) {
+    /* Mobile header - NO THEME TOGGLE */
+    #mobileHeaderNew {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 60px !important;
+        background: var(--mobile-bg) !important;
+        border-bottom: 1px solid var(--mobile-border) !important;
+        z-index: 2000 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0 15px !important;
+        box-shadow: 0 2px 4px var(--mobile-shadow) !important;
+    }
+    
+    /* Hamburger button */
+    #hamburgerBtnNew {
+        width: 30px !important;
+        height: 30px !important;
+        background: none !important;
+        border: none !important;
+        cursor: pointer !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-around !important;
+        z-index: 2001 !important;
+    }
+    
+    #hamburgerBtnNew span {
+        width: 100% !important;
+        height: 3px !important;
+        background: var(--mobile-text) !important;
+        transition: 0.3s !important;
+        border-radius: 2px !important;
+    }
+    
+    /* Hamburger animation */
+    #hamburgerBtnNew.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px) !important;
+    }
+    
+    #hamburgerBtnNew.active span:nth-child(2) {
+        opacity: 0 !important;
+    }
+    
+    #hamburgerBtnNew.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px) !important;
+    }
+    
+    /* Sidebar with theme support */
+    #sidebarNew {
+        position: fixed !important;
+        top: 0 !important;
+        left: -300px !important;
+        width: 300px !important;
+        height: 100vh !important;
+        background: var(--mobile-bg) !important;
+        z-index: 1999 !important;
+        transition: left 0.3s ease !important;
+        overflow-y: auto !important;
+        box-shadow: 2px 0 10px var(--mobile-shadow) !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* When sidebar is open */
+    #sidebarNew.open {
+        left: 0 !important;
+    }
+    
+    /* Overlay */
+    #overlayNew {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: var(--mobile-overlay) !important;
+        z-index: 1998 !important;
+        display: none !important;
+    }
+    
+    #overlayNew.show {
+        display: block !important;
+    }
+    
+    /* Sidebar content styling */
+    .sidebar-content-new {
+        padding-top: 60px !important;
+    }
+    
+    .user-section-new {
+        text-align: center !important;
+        margin-bottom: 30px !important;
+        padding-bottom: 20px !important;
+        border-bottom: 1px solid var(--mobile-border) !important;
+    }
+    
+    .user-section-new img {
+        width: 80px !important;
+        height: 80px !important;
+        border-radius: 50% !important;
+        margin-bottom: 15px !important;
+        border: 3px solid var(--mobile-accent) !important;
+        object-fit: cover !important;
+    }
+    
+    .user-section-new h3 {
+        margin: 0 !important;
+        font-size: 20px !important;
+        color: var(--mobile-text) !important;
+        font-weight: 600 !important;
+    }
+    
+    .user-section-new p {
+        margin: 8px 0 0 0 !important;
+        color: var(--mobile-text-secondary) !important;
+        font-size: 14px !important;
+    }
+    
+    /* Navigation links */
+    .nav-list-new {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .nav-item-new {
+        margin-bottom: 5px !important;
+    }
+    
+    .nav-link-new {
+        display: flex !important;
+        align-items: center !important;
+        padding: 12px 15px !important;
+        color: var(--mobile-text) !important;
+        text-decoration: none !important;
+        border-radius: 8px !important;
+        transition: all 0.3s !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+    }
+    
+    .nav-link-new:hover {
+        background: var(--mobile-hover) !important;
+        color: var(--mobile-accent) !important;
+        transform: translateX(5px) !important;
+    }
+    
+    .nav-link-new i {
+        margin-right: 12px !important;
+        width: 20px !important;
+        font-size: 18px !important;
+        color: var(--mobile-accent) !important;
+    }
+    
+    /* Footer links */
+    .footer-section-new {
+        margin-top: 30px !important;
+        padding-top: 20px !important;
+        border-top: 1px solid var(--mobile-border) !important;
+    }
+    
+    /* Main content adjustment */
+    .main-content {
+        margin-top: 60px !important;
+        margin-left: 0 !important;
+        padding: 20px !important;
+    }
+    
+    /* Hide original sidebar on mobile */
+    .sidebar:not(#sidebarNew) {
+        display: none !important;
+    }
+    
+    /* Header title styling */
+    .mobile-header-title {
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        color: var(--mobile-text) !important;
+        margin: 0 !important;
+    }
+    
+    /* User avatar in header */
+    .user-avatar-header {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        overflow: hidden !important;
+    }
+    
+    .user-avatar-header img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+}
+
+/* Desktop - hide mobile elements */
+@media (min-width: 769px) {
+    #mobileHeaderNew,
+    #sidebarNew,
+    #overlayNew {
+        display: none !important;
+    }
+}
+
+/* Profile Picture Popup/Lightbox Styles */
+.profile-pic-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s ease;
+}
+
+.profile-pic-lightbox.show {
+    display: flex;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    animation: zoomIn 0.3s ease;
+}
+
+/* Add loading state for lightbox image */
+.lightbox-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    background: var(--mobile-bg);
+    min-height: 200px;
+    min-width: 200px;
+}
+
+/* Loading spinner for images */
+.lightbox-image[src=""], .lightbox-image:not([src]) {
+    background: var(--mobile-bg) url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="20" fill="none" stroke="%23007bff" stroke-width="4"><animate attributeName="stroke-dasharray" values="0 126;63 63;0 126" dur="1.5s" repeatCount="indefinite"/></circle></svg>') center/50px no-repeat;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: -50px;
+    right: -10px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.lightbox-info {
+    position: absolute;
+    bottom: -60px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.lightbox-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.lightbox-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Clickable profile pictures */
+.user-avatar img,
+.user-avatar-header img,
+.user-section-new img {
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.user-avatar img:hover,
+.user-avatar-header img:hover,
+.user-section-new img:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from { 
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .lightbox-close {
+        top: -40px;
+        right: 0;
+        font-size: 20px;
+        width: 35px;
+        height: 35px;
+    }
+    
+    .lightbox-info {
+        bottom: -50px;
+        padding: 12px;
+    }
+    
+    .lightbox-info h3 {
+        font-size: 1.1rem;
+    }
+    
+    .lightbox-info p {
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- NEW MOBILE HEADER - NO THEME TOGGLE -->
+<div id="mobileHeaderNew">
+    <button id="hamburgerBtnNew">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <h1 class="mobile-header-title">{% block header_title %}Student Dashboard{% endblock %}</h1>
+    <div class="user-avatar-header">
+        <img src="{% block user_avatar %}{{student.student_profile.url}}{% endblock %}" alt="User Avatar" >
+    </div>
+</div>
+
+<!-- NEW MOBILE SIDEBAR -->
+<div id="sidebarNew">
+    <div class="sidebar-content-new">
+        <div class="user-section-new">
+            <img src="{{student.student_profile.url}}" alt="Student" >
+            <h3>{{student.first_name|default:"N/A"}}</h3>
+            
+        </div>
+        
+        <ul class="nav-list-new">
+            <li class="nav-item-new">
+                <a href="{% url 'student:student_dashboard' %}" class="nav-link-new">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item-new">
+                <a href="{% url 'student:news_feed' %}" class="nav-link-new">
+                    <i class="fas fa-newspaper"></i>
+                    News Feed
+                </a>
+            </li>
+            <li class="nav-item-new">
+               <a href="{% url 'student:assignments' %}" class="nav-link-new">
+                    <i class="fas fa-tasks"></i>
+                    Assignments
+                </a>
+            </li>
+            <li class="nav-item-new">
+                <a href="{% url 'student:teacher' %}" class="nav-link-new">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Teachers
+                </a>
+            </li>
+            <li class="nav-item-new">
+                <a href="{% url 'student:project' %}" class="nav-link-new">
+                    <i class="fas fa-project-diagram"></i>
+                    Project Submissions
+                </a>
+            </li>
+             <li class="nav-item">
+                        <a href="{% url 'home:home' %}" class="nav-link">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Back
+                        </a>
+                    </li>
+        </ul>
+        
+        <div class="footer-section-new">
+            <ul class="nav-list-new">
+                <li class="nav-item-new">
+                    <a href="{% url 'student:setting' %}" class="nav-link-new">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- NEW OVERLAY -->
+<div id="overlayNew"></div>
+
+<!-- Profile Picture Lightbox - MOVED HERE -->
+<div class="profile-pic-lightbox" id="profileLightbox">
+    <div class="lightbox-content">
+        <button class="lightbox-close" id="lightboxClose">
+            <i class="fas fa-times"></i>
+        </button>
+        <img class="lightbox-image" id="lightboxImage" src="{{student.student_profile.url}}" alt="Profile Picture">
+        <div class="lightbox-info" id="lightboxInfo">
+            <h3 id="lightboxName">{{student.first_name}} {{student.last_name |default:"STD"}}</h3>
+            
+        </div>
+    </div>
+</div>
+
+<!-- YOUR ORIGINAL CONTENT -->
+<div class="dashboard-container">
+    <!-- Original Sidebar (hidden on mobile) -->
+    <aside class="sidebar">
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img src="{{student.student_profile.url}}" alt="Student">
+                </div>
+                <div class="user-info">
+                    <h3>{{student.first_name}} {{student.last_name}}</h3>
+                </div>
+            </div>
+
+            <nav class="navigation">
+                
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'student_dashboard' %}active{% endif %}">
+                        <a href="{% url 'student:student_dashboard' %}" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'news_feed' %}active{% endif %}">
+                        <a href="{% url "student:news_feed" %}" class="nav-link">
+                            <i class="fas fa-newspaper"></i>
+                            News Feed
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "student:assignments" %}"class="nav-link">
+                            <i class="fas fa-tasks"></i>
+                            Assignments
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'teacher' %}active{% endif %}">
+                        <a href="{% url 'student:teacher' %}" class="nav-link">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Teachers
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'project' %}active{% endif %}">
+                        <a href="{% url 'student:project' %}" class="nav-link">
+                            <i class="fas fa-project-diagram"></i>
+                            Project Submissions
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'home:home' %}" class="nav-link">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Back
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="footer-links">
+                    <a href="{% url 'student:setting' %}" class="footer-link">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+      
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        <!-- Page content goes here -->
+        {% endblock %}
+    </main>
+</div>
+
+<!-- TRY TO LOAD ORIGINAL JS (with error handling) -->
+<script>
+// Try to load dashboard.js, but don't break if it fails
+try {
+
+    const script = document.createElement('script');
+    script.src = "{% static 'student/js/dashboard.js' %}";
+    script.onerror = function() {
+        console.log('Dashboard.js not found - using fallback functionality');
+    };
+    document.head.appendChild(script);
+} catch (error) {
+    console.log('Could not load dashboard.js - using fallback functionality');
+}
+</script>
+
+<!-- UNIFIED THEME & MOBILE MENU SYSTEM -->
+<script>
+
+
+// UNIFIED THEME SYSTEM
+window.UnifiedTheme = {
+    init: function() {
+        this.syncThemeFromStorage();
+        this.setupThemeListeners();
+    },
+    
+    syncThemeFromStorage: function() {
+        const savedTheme = localStorage.getItem('theme') || localStorage.getItem('dashboard-theme') || 'light';
+        this.applyTheme(savedTheme);
+    },
+    
+    applyTheme: function(theme) {
+    
+
+        
+        // Apply to all possible theme systems
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            document.documentElement.setAttribute('data-theme', 'dark');
+
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.body.classList.remove('dark-theme');
+        }
+        
+        // Save to both possible storage keys
+        localStorage.setItem('theme', theme);
+        localStorage.setItem('dashboard-theme', theme);
+        
+        // Update settings page toggle if it exists
+        this.updateSettingsToggle(theme);
+        
+        // Dispatch custom event for other scripts
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
+    },
+    
+    updateSettingsToggle: function(theme) {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            const checkbox = darkModeToggle.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = theme === 'dark';
+                if (theme === 'dark') {
+                    darkModeToggle.classList.add('checked');
+                } else {
+                    darkModeToggle.classList.remove('checked');
+                }
+            }
+        }
+    },
+    
+    setupThemeListeners: function() {
+        // Listen for theme changes from settings page
+        window.addEventListener('themeChanged', (e) => {
+  
+        });
+        
+        // Listen for storage changes (theme changed in another tab)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme' || e.key === 'dashboard-theme') {
+                this.syncThemeFromStorage();
+            }
+        });
+    },
+    
+    toggle: function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        this.applyTheme(newTheme);
+        return newTheme;
+    }
+};
+
+// MOBILE MENU SYSTEM
+document.addEventListener('DOMContentLoaded', function() {
+    const hamburger = document.getElementById('hamburgerBtnNew');
+    const sidebar = document.getElementById('sidebarNew');
+    const overlay = document.getElementById('overlayNew');
+    
+
+    
+    if (!hamburger || !sidebar || !overlay) {
+     
+        return;
+    }
+    
+    let isOpen = false;
+    
+    function openSidebar() {
+       
+        sidebar.classList.add('open');
+        overlay.classList.add('show');
+        hamburger.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        isOpen = true;
+    }
+    
+    function closeSidebar() {
+
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+        hamburger.classList.remove('active');
+        document.body.style.overflow = '';
+        isOpen = false;
+    }
+    
+    // Hamburger click
+    hamburger.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (isOpen) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+    
+    // Overlay click
+    overlay.addEventListener('click', function() {
+
+        closeSidebar();
+    });
+    
+    // Close on nav link click
+    const navLinks = sidebar.querySelectorAll('.nav-link-new');
+    navLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+ 
+            setTimeout(closeSidebar, 100);
+        });
+    });
+    
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isOpen) {
+            closeSidebar();
+        }
+    });
+    
+    // Close on window resize to desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && isOpen) {
+            closeSidebar();
+        }
+    });
+    
+    // Initialize unified theme system
+    window.UnifiedTheme.init();
+    
+
+});
+
+// Global function for theme toggle (can be called from settings)
+window.toggleTheme = function() {
+    return window.UnifiedTheme.toggle();
+};
+
+// PROFILE PICTURE LIGHTBOX FUNCTIONALITY - IMPROVED VERSION
+document.addEventListener('DOMContentLoaded', function() {
+
+    
+    // Wait a bit more to ensure all elements are loaded
+    setTimeout(function() {
+        initProfilePictureLightbox();
+    }, 500);
+});
+
+function initProfilePictureLightbox() {
+
+    
+    const lightbox = document.getElementById('profileLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxName = document.getElementById('lightboxName');
+    const lightboxRole = document.getElementById('lightboxRole');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    if (!lightbox || !lightboxImage || !lightboxClose) {
+
+        return;
+    }
+    
+    // Function to open lightbox
+    function openLightbox(imageSrc, name, role) {
+        // Clear any previous error handlers
+        lightboxImage.onerror = null;
+        lightboxImage.onload = null;
+        
+        // Flag to prevent infinite loop
+        let fallbackAttempted = false;
+        
+        // Set up proper error handling with local fallback
+        lightboxImage.onerror = function() {
+            if (!fallbackAttempted) {
+    
+                fallbackAttempted = true;
+                
+                // Create a local SVG fallback instead of external service
+                const initial = (name && name.charAt(0)) ? name.charAt(0).toUpperCase() : 'U';
+                const svgFallback = `data:image/svg+xml,${encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+                        <rect width="300" height="300" fill="#007bff"/>
+                        <text x="150" y="180" font-family="Arial, sans-serif" font-size="120" font-weight="bold" text-anchor="middle" fill="white">${initial}</text>
+                    </svg>
+                `)}`;
+                
+                this.src = svgFallback;
+            } else {
+              
+                // If even the SVG fails, hide the image and show CSS background
+                this.style.display = 'none';
+                this.parentElement.style.background = `linear-gradient(135deg, #007bff, #4dabf7)`;
+                this.parentElement.style.display = 'flex';
+                this.parentElement.style.alignItems = 'center';
+                this.parentElement.style.justifyContent = 'center';
+                this.parentElement.innerHTML += `<div style="color: white; font-size: 4rem; font-weight: bold;">${(name && name.charAt(0)) ? name.charAt(0).toUpperCase() : 'U'}</div>`;
+            }
+        };
+        
+        lightboxImage.onload = function() {
+
+            // Reset any CSS modifications
+            this.style.display = '';
+            this.parentElement.style.background = '';
+        };
+        
+        // Set image source - this will trigger load or error
+        lightboxImage.src = imageSrc;
+        
+        // Set user info
+        if (lightboxName) lightboxName.textContent = name || 'Student';
+        if (lightboxRole) lightboxRole.textContent = role || 'Student';
+        
+        // Show lightbox
+        lightbox.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        
+        // Add haptic feedback if supported
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    }
+    
+    // Function to close lightbox
+    function closeLightbox() {
+
+        lightbox.classList.remove('show');
+        document.body.style.overflow = '';
+        
+        // Clear image src after animation
+        setTimeout(() => {
+            if (lightboxImage) lightboxImage.src = '';
+        }, 300);
+    }
+    
+    // Add click handlers to all profile pictures
+    function addClickHandlers() {
+ 
+        
+        // Desktop sidebar profile picture
+        const desktopAvatar = document.querySelector('.user-avatar img');
+
+        if (desktopAvatar) {
+            desktopAvatar.style.cursor = 'pointer';
+            desktopAvatar.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const name = document.querySelector('.user-info h3')?.textContent || 'Student';
+                const role = document.querySelector('.user-info p')?.textContent || 'Student';
+                openLightbox(this.src, name, role);
+            });
+        }
+        
+        // Mobile header profile picture
+        const mobileHeaderAvatar = document.querySelector('.user-avatar-header img');
+       
+        if (mobileHeaderAvatar) {
+            mobileHeaderAvatar.style.cursor = 'pointer';
+            mobileHeaderAvatar.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const name = document.querySelector('.user-section-new h3')?.textContent || 
+                           document.querySelector('.user-info h3')?.textContent || 'Student';
+                const role = document.querySelector('.user-section-new p')?.textContent || 
+                           document.querySelector('.user-info p')?.textContent || 'Student';
+                openLightbox(this.src, name, role);
+            });
+        }
+        
+        // Mobile sidebar profile picture
+        const mobileSidebarAvatar = document.querySelector('.user-section-new img');
+    
+        if (mobileSidebarAvatar) {
+            mobileSidebarAvatar.style.cursor = 'pointer';
+            mobileSidebarAvatar.addEventListener('click', function(e) {
+                e.preventDefault();
+           
+                const name = document.querySelector('.user-section-new h3')?.textContent || 'Student';
+                const role = document.querySelector('.user-section-new p')?.textContent || 'Student';
+                openLightbox(this.src, name, role);
+            });
+        }
+        
+
+    }
+    
+    // Close lightbox handlers
+    if (lightboxClose) {
+        lightboxClose.addEventListener('click', function(e) {
+            e.preventDefault();
+      
+            closeLightbox();
+        });
+    }
+    
+    // Close on overlay click
+    if (lightbox) {
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) {
+             
+                closeLightbox();
+            }
+        });
+    }
+    
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && lightbox && lightbox.classList.contains('show')) {
+           
+            closeLightbox();
+        }
+    });
+    
+    // Initialize click handlers
+    addClickHandlers();
+    
+ 
+    
+}
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

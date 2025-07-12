@@ -1,0 +1,508 @@
+{% load static %}
+{% load teach_group_filter %} 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Teacher Dashboard {% endblock %}</title>
+    
+    <!-- Theme Flash Fix -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('dashboard-theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'teacher/css/dashboard.css' %}">
+    
+    <style>
+        /* Additional styles for mobile header space */
+        .mobile-profile-space {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar-content {
+                padding-top: 100px; /* Add space for mobile header */
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .sidebar-content {
+                padding-top: 1.5rem;
+            }
+        }
+
+        /* User Profile Modal Styles */
+        .user-avatar {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-modal.show {
+            display: flex;
+            opacity: 1;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-modal-content {
+            background: var(--bg-primary, #ffffff);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-modal.show .profile-modal-content {
+            transform: scale(1);
+        }
+
+        .profile-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary, #666);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .profile-modal-close:hover {
+            background-color: var(--bg-secondary, #f5f5f5);
+        }
+
+        .profile-modal-avatar {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-modal-avatar img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-color, #007bff);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-modal-info {
+            text-align: center;
+        }
+
+        .profile-modal-info h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary, #333);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .profile-modal-info .role {
+            color: var(--primary-color, #007bff);
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-details {
+            background: var(--bg-secondary, #f8f9fa);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .profile-detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .profile-detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .profile-detail-item i {
+            width: 20px;
+            margin-right: 1rem;
+            color: var(--primary-color, #007bff);
+        }
+
+        .profile-detail-item span {
+            color: var(--text-primary, #333);
+            font-weight: 500;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-primary, #ffffff);
+            border-radius: 10px;
+            border: 1px solid var(--border-color, #e0e0e0);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color, #007bff);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary, #666);
+            margin-top: 0.25rem;
+        }
+
+        /* Dark theme support */
+        [data-theme="dark"] .profile-modal-content {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .profile-details {
+            background: var(--bg-tertiary);
+        }
+
+        [data-theme="dark"] .stat-item {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .profile-modal-content {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            .profile-modal-avatar img {
+                width: 120px;
+                height: 120px;
+            }
+
+            .profile-modal-info h2 {
+                font-size: 1.5rem;
+            }
+
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1>{% block header_title %}Dashboard{% endblock %}</h1>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <!-- User Profile -->
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatarTrigger">
+                        <img src="{% block user_avatar %}{% endblock %}" 
+                             alt="{% block user_name %}{{teacher.first_name}} {{teacher.last_name}} {% endblock %}"
+                             id="userAvatarImage">
+                    </div>
+                    <div class="user-info">
+                        <h3>{% block user_display_name %}{{teacher.first_name}} {{teacher.last_name}}  {% endblock %}</h3>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="navigation">
+                    <ul>
+                        {% block navigation %}
+                        <li class="nav-item {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
+                            <a href="{% url "teacher:teacher_dashboard" %}">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.resolver_match.url_name == 'teacher_class' %}active{% endif %}">
+                            <a href="{% url "teacher:teacher_class" %}">
+                               <i class="fa-solid fa-people-roof"></i>
+                                <span>Classes</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
+                            <a href="{% url "teacher:student_list" %}">
+                                <i class="fas fa-users"></i>
+                                <span>Students</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.resolver_match.url_name == 'assignments' %}active{% endif %}">
+                            <a href="{% url "teacher:assignments" %}">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Assignments</span>
+                            </a>
+                        </li>
+                        {% if user|has_group:"Head" %} 
+                         <li class="nav-item {% if request.resolver_match.url_name == 'upload_gallery' %}active{% endif %}">
+                             <a href="{% url "teacher:upload_gallery" %}">
+                                 <i class="fa-solid fa-image"></i>
+                                 
+                                 <span>Upload Images </span>
+
+                             </a>
+                         </li>
+                        {% endif %}
+
+
+
+                       {% if user|has_group:"Head" %} 
+                         <li class="nav-item {% if request.resolver_match.url_name == 'upload_news' %}active{% endif %}">
+                             <a href="{% url "teacher:upload_news" %}">
+                                 <i class="fa-solid fa-newspaper"></i>
+                                 <span>Upload News</span>
+
+                             </a>
+                         </li>
+                        {% endif %}
+                        <li class="nav-item {% if request.resolver_match.url_name == 'project_submitted' %}active{% endif %}">
+                            <a href="{% url "teacher:project_submitted" %}">
+                                <i class="fas fa-folder"></i>
+                                <span>Project Review</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                            <a href="{% url "teacher:settings" %}">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url "home:home" %}">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>Back</span>
+                            </a>
+                        </li>
+
+                        {% endblock navigation %}
+                    </ul>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="sidebar-footer">
+                    <div class="footer-links">
+                        {% block footer_links %}
+                        <a href="{% url "teacher:logout" %}">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                        {% endblock footer_links %}
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}
+            <!-- Default dashboard content - can be overridden -->
+            <div class="content-section active">
+                <div class="content-header">
+                    <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+
+                {% block dashboard_content %}
+                <!-- Profile Section -->
+                <section class="student-profile">
+                    <div class="profile-card">
+                        <div class="profile-image">
+                            <img src="{{teacher.teacher_image.url}}" alt="{{teacher.name}}">
+                        </div>
+                        <div class="profile-info">
+                            <h2>{{teacher.first_name}} {{teacher.last_name}}</h2>
+                            <p>Contact: {{teacher.contact}}</p>
+                        </div>
+                    </div>
+                </section>
+                {% endblock dashboard_content %}
+            </div>
+            {% endblock content %}
+        </main>
+
+        <!-- Mobile Overlay -->
+        <div class="overlay" id="mobileOverlay"></div>
+
+        <!-- Profile Modal -->
+        <div class="profile-modal" id="profileModal">
+            <div class="profile-modal-content">
+                <button class="profile-modal-close" id="profileModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="profile-modal-avatar">
+                    <img src="{% block modal_user_avatar %}{% endblock %}" 
+                         alt="{% block modal_user_name %}{{teacher.first_name}} {{teacher.last_name}}{% endblock %}"
+                         id="modalAvatarImage">
+                </div>
+                
+                <div class="profile-modal-info">
+                    <h2 id="modalUserName">{% block modal_user_display_name %}{{teacher.first_name}} {{teacher.last_name}}{% endblock %}</h2>
+             
+                </div>
+
+                <div class="profile-details">
+                    <div class="profile-detail-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>{% block modal_user_email %}{{teacher.email}}{% endblock %}</span>
+                    </div>
+                    <div class="profile-detail-item">
+                        <i class="fas fa-phone"></i>
+                        <span>{% block modal_user_phone %} {{teacher.contact}}{% endblock %}</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'teacher/js/dashboard.js' %}"></script>
+    
+    <script>
+        // Profile Modal Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userAvatarTrigger = document.getElementById('userAvatarTrigger');
+            const profileModal = document.getElementById('profileModal');
+            const profileModalClose = document.getElementById('profileModalClose');
+            const userAvatarImage = document.getElementById('userAvatarImage');
+            const modalAvatarImage = document.getElementById('modalAvatarImage');
+
+            // Function to open modal
+            function openProfileModal() {
+                // Copy the avatar image source to modal
+                if (userAvatarImage && modalAvatarImage) {
+                    modalAvatarImage.src = userAvatarImage.src;
+                    modalAvatarImage.alt = userAvatarImage.alt;
+                }
+                
+                profileModal.style.display = 'flex';
+                // Small delay to ensure display is set before adding show class
+                setTimeout(() => {
+                    profileModal.classList.add('show');
+                }, 10);
+                
+                // Prevent body scroll
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Function to close modal
+            function closeProfileModal() {
+                profileModal.classList.remove('show');
+                
+                // Wait for animation to complete before hiding
+                setTimeout(() => {
+                    profileModal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }, 300);
+            }
+
+            // Event listeners
+            if (userAvatarTrigger) {
+                userAvatarTrigger.addEventListener('click', openProfileModal);
+            }
+
+            if (profileModalClose) {
+                profileModalClose.addEventListener('click', closeProfileModal);
+            }
+
+            // Close modal when clicking outside content
+            profileModal.addEventListener('click', function(e) {
+                if (e.target === profileModal) {
+                    closeProfileModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && profileModal.classList.contains('show')) {
+                    closeProfileModal();
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (profileModal.classList.contains('show')) {
+                    // Ensure modal stays centered on resize
+                    profileModal.style.display = 'flex';
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

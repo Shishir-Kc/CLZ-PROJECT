@@ -1,0 +1,1816 @@
+{% extends 'teach_base/base.html' %}
+{% load static %}
+
+{% block title %}News Management - Teacher Dashboard{% endblock %}
+
+{% block header_title %}News Management{% endblock %}
+
+{% block page_title %}News Management{% endblock %}
+
+{% block user_avatar %} {{teacher.teacher_image.url}} {% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Keep your original theme colors and just enhance the news management styles */
+    .news-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        padding: 1.5rem;
+        min-height: calc(100vh - 200px);
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Upload Section */
+    .upload-section {
+        background: var(--bg-primary, #ffffff);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        height: fit-content;
+        border: 1px solid var(--border-color, #e0e0e0);
+        transition: all 0.3s ease;
+    }
+
+    .upload-section:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    /* News List Section */
+    .news-list-section {
+        background: var(--bg-primary, #ffffff);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color, #e0e0e0);
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 120px);
+        transition: all 0.3s ease;
+    }
+
+    .news-list-section:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary, #333);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -0.5rem;
+        left: 0;
+        width: 3rem;
+        height: 3px;
+        background: var(--primary-color, #007bff);
+        border-radius: 2px;
+    }
+
+    .section-title i {
+        color: var(--primary-color, #007bff);
+        font-size: 1.5rem;
+    }
+
+    .article-count {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: var(--text-secondary, #666);
+        margin-left: auto;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary, #333);
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .form-label i {
+        color: var(--primary-color, #007bff);
+        width: 18px;
+        font-size: 1rem;
+    }
+
+    .form-input, .form-textarea, .form-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color, #e0e0e0);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: var(--bg-secondary, #f8f9fa);
+        color: var(--text-primary, #333);
+        font-family: inherit;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--primary-color, #007bff);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        background: var(--bg-primary, #ffffff);
+        transform: translateY(-1px);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+
+    /* File Upload Styles */
+    .file-upload-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .file-upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 2rem 1rem;
+        border: 2px dashed var(--border-color, #e0e0e0);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--bg-secondary, #f8f9fa);
+        color: var(--text-secondary, #666);
+        text-align: center;
+    }
+
+    .file-upload-label:hover {
+        border-color: var(--primary-color, #007bff);
+        background: rgba(0, 123, 255, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .file-upload-label i {
+        font-size: 2rem;
+        color: var(--primary-color, #007bff);
+    }
+
+    .file-upload-label span {
+        font-weight: 500;
+    }
+
+    .upload-hint {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #999);
+        margin-top: 0.25rem;
+    }
+
+    /* Upload Button */
+    .upload-btn {
+        background: linear-gradient(135deg, var(--primary-color, #007bff), #0056b3);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+    }
+
+    .upload-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Search Styles */
+    .search-container {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border: 2px solid var(--border-color, #e0e0e0);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background: var(--bg-secondary, #f8f9fa);
+        transition: all 0.3s ease;
+        color: var(--text-primary, #333);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color, #007bff);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        background: var(--bg-primary, #ffffff);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary, #999);
+        font-size: 1.1rem;
+    }
+
+    .search-clear {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary, #999);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        display: none;
+        transition: all 0.2s ease;
+    }
+
+    .search-clear:hover {
+        background: var(--bg-tertiary, #f1f3f4);
+        color: #dc3545;
+    }
+
+    .search-clear.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* News List */
+    .news-list {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .news-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .news-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .news-list::-webkit-scrollbar-thumb {
+        background: var(--border-color, #e0e0e0);
+        border-radius: 3px;
+    }
+
+    .news-item {
+        background: var(--bg-secondary, #f8f9fa);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color, #e0e0e0);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .news-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--primary-color, #007bff);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .news-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color, #007bff);
+        background: var(--bg-primary, #ffffff);
+    }
+
+    .news-item:hover::before {
+        transform: scaleY(1);
+    }
+
+    .news-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        gap: 1rem;
+    }
+
+    .news-title {
+        font-weight: 600;
+        color: var(--text-primary, #333);
+        font-size: 1.125rem;
+        margin: 0;
+        flex: 1;
+        line-height: 1.4;
+    }
+
+    .news-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        padding: 0.625rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+    }
+
+    .view-btn {
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .view-btn:hover {
+        background: rgba(59, 130, 246, 0.2);
+        transform: scale(1.1);
+    }
+
+    .delete-btn {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .delete-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: scale(1.1);
+    }
+
+    .news-category {
+        display: inline-block;
+        background: var(--primary-color, #007bff);
+        color: white;
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .news-preview {
+        color: var(--text-secondary, #666);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .news-date {
+        color: var(--text-secondary, #999);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+    .news-date i {
+        color: var(--primary-color, #007bff);
+    }
+
+    /* Modal Styles - FIXED ANIMATION */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+        opacity: 1;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .modal-content {
+        background: var(--bg-primary, #ffffff);
+        border-radius: 15px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color, #e0e0e0);
+        
+        /* Initial state - hidden and scaled down */
+        transform: scale(0.8);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* When modal is shown - scale up and fade in */
+    .modal-overlay.show .modal-content {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    /* When modal is closing - scale down and fade out */
+    .modal-overlay.closing .modal-content {
+        transform: scale(0.8);
+        opacity: 0;
+        transition: all 0.25s ease-out;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--bg-secondary, #f8f9fa);
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: var(--text-secondary, #666);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 1;
+    }
+
+    .modal-close:hover {
+        background: #ef4444;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .modal-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary, #333);
+        margin: 0 0 1rem 0;
+        padding-right: 3rem;
+        line-height: 1.3;
+    }
+
+    .modal-category {
+        display: inline-block;
+        background: var(--primary-color, #007bff);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .modal-content-text {
+        color: var(--text-primary, #333);
+        line-height: 1.7;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        white-space: pre-wrap;
+    }
+
+    .modal-date {
+        color: var(--text-secondary, #666);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color, #e0e0e0);
+        font-weight: 500;
+    }
+
+    .modal-date i {
+        color: var(--primary-color, #007bff);
+    }
+
+    .modal-image {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Delete Modal */
+    .delete-modal .modal-content {
+        max-width: 450px;
+        text-align: center;
+    }
+
+    .delete-modal-icon {
+        font-size: 4rem;
+        color: #ef4444;
+        margin-bottom: 1rem;
+    }
+
+    .delete-modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary, #333);
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-modal-text {
+        color: var(--text-secondary, #666);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+
+    .delete-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .delete-confirm-btn, .delete-cancel-btn {
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .delete-confirm-btn {
+        background: #ef4444;
+        color: white;
+    }
+
+    .delete-confirm-btn:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .delete-cancel-btn {
+        background: var(--bg-secondary, #f8f9fa);
+        color: var(--text-primary, #333);
+        border: 1px solid var(--border-color, #e0e0e0);
+    }
+
+    .delete-cancel-btn:hover {
+        background: var(--bg-tertiary, #e9ecef);
+        transform: translateY(-2px);
+    }
+
+    /* Alert Messages */
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border: 1px solid;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: #ecfdf5;
+        color: #065f46;
+        border-color: #a7f3d0;
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+    }
+
+    .alert-info {
+        background: #eff6ff;
+        color: #1e40af;
+        border-color: #bfdbfe;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* File Preview */
+    .file-preview {
+        margin-top: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-tertiary, #f1f3f4);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: var(--text-secondary, #666);
+        display: none;
+        border: 1px solid var(--border-color, #e0e0e0);
+    }
+
+    .file-preview.show {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .file-preview i {
+        color: var(--primary-color, #007bff);
+        font-size: 1.1rem;
+    }
+
+    .file-preview-remove {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .file-preview-remove:hover {
+        background: rgba(239, 68, 68, 0.1);
+        transform: scale(1.1);
+    }
+
+    /* Search Results */
+    .search-results {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #666);
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-tertiary, #f8f9fa);
+        border-radius: 8px;
+        display: none;
+        border-left: 4px solid var(--primary-color, #007bff);
+    }
+
+    .search-results.show {
+        display: block;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary, #666);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--primary-color, #007bff);
+        margin-bottom: 1.5rem;
+        opacity: 0.7;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.75rem 0;
+        color: var(--text-primary, #333);
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    /* ULTRA COMPACT MOBILE RESPONSIVE DESIGN */
+    @media (max-width: 1024px) {
+        .news-container {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .upload-section {
+            order: 2;
+        }
+
+        .news-list-section {
+            order: 1;
+            max-height: 50vh;
+        }
+    }
+
+    /* COMPACT TABLET STYLES */
+    @media (max-width: 768px) {
+        .news-container {
+            padding: 0.25rem;
+            gap: 0.25rem;
+        }
+
+        .upload-section, .news-list-section {
+            padding: 0.75rem;
+            border-radius: 6px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            gap: 0.25rem;
+        }
+
+        .section-title i {
+            font-size: 0.9rem;
+        }
+
+        .section-title::after {
+            width: 1.5rem;
+            height: 2px;
+        }
+
+        .article-count {
+            font-size: 0.7rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-input, .form-textarea, .form-select, .search-input {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .form-textarea {
+            min-height: 60px;
+        }
+
+        .file-upload-label {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .file-upload-label i {
+            font-size: 1.25rem;
+        }
+
+        .upload-btn {
+            padding: 0.625rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .news-item {
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .news-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .news-title {
+            font-size: 0.85rem;
+        }
+
+        .news-actions {
+            align-self: flex-end;
+            margin-top: -1.5rem;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            padding: 0.25rem;
+        }
+
+        .news-category {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .news-preview {
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+            -webkit-line-clamp: 1;
+        }
+
+        .news-date {
+            font-size: 0.7rem;
+        }
+
+        .modal-content {
+            padding: 0.75rem;
+            margin: 0.25rem;
+            border-radius: 6px;
+        }
+
+        .modal-title {
+            font-size: 1rem;
+            padding-right: 2rem;
+        }
+
+        .modal-category {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-content-text {
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-date {
+            font-size: 0.75rem;
+        }
+
+        .delete-modal .modal-content {
+            max-width: 280px;
+        }
+
+        .delete-modal-icon {
+            font-size: 2rem;
+        }
+
+        .delete-modal-title {
+            font-size: 1rem;
+        }
+
+        .delete-modal-text {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .delete-modal-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .delete-confirm-btn, .delete-cancel-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .empty-state {
+            padding: 1rem 0.5rem;
+        }
+
+        .empty-state i {
+            font-size: 1.5rem;
+        }
+
+        .empty-state h3 {
+            font-size: 0.9rem;
+        }
+
+        .empty-state p {
+            font-size: 0.75rem;
+        }
+    }
+
+    /* ULTRA COMPACT MOBILE PHONE STYLES */
+    @media (max-width: 480px) {
+        .news-container {
+            padding: 0.125rem;
+            gap: 0.125rem;
+        }
+
+        .upload-section, .news-list-section {
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            gap: 0.125rem;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .section-title i {
+            font-size: 0.8rem;
+        }
+
+        .article-count {
+            margin-left: 0;
+            margin-top: 0.125rem;
+            font-size: 0.65rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            gap: 0.25rem;
+        }
+
+        .form-input, .form-textarea, .form-select, .search-input {
+            padding: 0.375rem;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .form-textarea {
+            min-height: 50px;
+        }
+
+        .file-upload-label {
+            padding: 0.5rem 0.25rem;
+            gap: 0.25rem;
+        }
+
+        .file-upload-label i {
+            font-size: 1rem;
+        }
+
+        .file-upload-label span {
+            font-size: 0.75rem;
+        }
+
+        .upload-hint {
+            font-size: 0.65rem;
+        }
+
+        .upload-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            gap: 0.25rem;
+        }
+
+        .search-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .search-input {
+            padding: 0.375rem 0.5rem 0.375rem 2rem;
+        }
+
+        .search-icon {
+            left: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .search-clear {
+            right: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .news-item {
+            padding: 0.375rem;
+            margin-bottom: 0.125rem;
+            border-radius: 4px;
+        }
+
+        .news-header {
+            margin-bottom: 0.125rem;
+        }
+
+        .news-title {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .news-actions {
+            margin-top: -1.25rem;
+            gap: 0.125rem;
+        }
+
+        .action-btn {
+            width: 24px;
+            height: 24px;
+            padding: 0.125rem;
+            font-size: 0.7rem;
+        }
+
+        .news-category {
+            font-size: 0.6rem;
+            padding: 0.125rem 0.375rem;
+            margin-bottom: 0.125rem;
+        }
+
+        .news-preview {
+            font-size: 0.7rem;
+            margin-bottom: 0.125rem;
+            -webkit-line-clamp: 1;
+        }
+
+        .news-date {
+            font-size: 0.65rem;
+            gap: 0.25rem;
+        }
+
+        .modal-overlay {
+            padding: 0.25rem;
+        }
+
+        .modal-content {
+            padding: 0.5rem;
+            margin: 0.125rem;
+            border-radius: 4px;
+        }
+
+        .modal-close {
+            top: 0.375rem;
+            right: 0.375rem;
+            width: 24px;
+            height: 24px;
+            font-size: 0.8rem;
+        }
+
+        .modal-title {
+            font-size: 0.9rem;
+            padding-right: 1.5rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .modal-category {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .modal-content-text {
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .modal-date {
+            font-size: 0.7rem;
+            padding-top: 0.375rem;
+        }
+
+        .modal-image {
+            max-height: 120px;
+            margin-bottom: 0.5rem;
+        }
+
+        .delete-modal .modal-content {
+            max-width: 250px;
+        }
+
+        .delete-modal-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .delete-modal-title {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .delete-modal-text {
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .delete-confirm-btn, .delete-cancel-btn {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .file-preview {
+            padding: 0.375rem;
+            font-size: 0.75rem;
+        }
+
+        .search-results {
+            font-size: 0.7rem;
+            padding: 0.375rem 0.5rem;
+        }
+
+        .alert {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            gap: 0.25rem;
+        }
+
+        .empty-state {
+            padding: 0.75rem 0.375rem;
+        }
+
+        .empty-state i {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state h3 {
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .empty-state p {
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+    }
+
+    /* EXTRA SMALL SCREENS */
+    @media (max-width: 360px) {
+        .news-container {
+            padding: 0.0625rem;
+        }
+
+        .upload-section, .news-list-section {
+            padding: 0.375rem;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+        }
+
+        .form-input, .form-textarea, .form-select, .search-input {
+            padding: 0.25rem;
+            font-size: 0.7rem;
+        }
+
+        .upload-btn {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        .news-item {
+            padding: 0.25rem;
+        }
+
+        .news-title {
+            font-size: 0.7rem;
+        }
+
+        .action-btn {
+            width: 20px;
+            height: 20px;
+            font-size: 0.6rem;
+        }
+
+        .modal-content {
+            padding: 0.375rem;
+        }
+
+        .modal-title {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-section active">
+    <div class="content-header">
+        <h1>News Management</h1>
+    </div>
+
+    <div class="news-container">
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <h2 class="section-title">
+                <i class="fas fa-plus-circle"></i>
+                Upload News
+            </h2>
+
+            <!-- Django Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif message.tags == 'info' %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Django Form -->
+            <form method="post" enctype="multipart/form-data" id="newsForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="id_title">
+                        <i class="fas fa-heading"></i>
+                        News Title
+                    </label>
+                    <input type="text" id="id_title" name="title" class="form-input" placeholder="Enter an engaging news title..." required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_category">
+                        <i class="fas fa-tags"></i>
+                        Category
+                    </label>
+                    <select id="id_category" name="category" class="form-select" required>
+                        <option value="">Choose a category</option>
+                        <option value="Academic">Academic</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Events">Events</option>
+                        <option value="Announcements">Announcements</option>
+                        <option value="Notice">Notice</option>
+                        <option value="Student Life">Student Life</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_content">
+                        <i class="fas fa-align-left"></i>
+                        News Content
+                    </label>
+                    <textarea id="id_content" name="content" class="form-textarea" placeholder="Write your news content here. Be detailed and engaging..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-image"></i>
+                        News Image (Optional)
+                    </label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="id_image" name="image" class="form-file" accept="image/*" style="display: none;">
+                        <label for="id_image" class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Click to upload image or drag and drop</span>
+                            <div class="upload-hint">Supports JPG, PNG, WebP up to 5MB</div>
+                        </label>
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        <i class="fas fa-file-image"></i>
+                        <span id="fileName"></span>
+                        <button type="button" class="file-preview-remove" id="removeFile" title="Remove file">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="upload-btn" id="submitBtn">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload News</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- News List Section -->
+        <div class="news-list-section">
+            <h2 class="section-title">
+                <i class="fas fa-newspaper"></i>
+                All News
+                <span class="article-count">
+                    {{ new_s|length }} article{{ new_s|length|pluralize }}
+                </span>
+            </h2>
+
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search news by title, content, or category...">
+                <button type="button" class="search-clear" id="searchClear" title="Clear search">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="search-results" id="searchResults"></div>
+
+            <div class="news-list" id="newsList">
+                {% for news in new_s %} 
+                <div class="news-item" 
+                     data-title="{{news.title}}" 
+                     data-category="{{news.category}}" 
+                     data-content="{{news.description}}" 
+                     data-date="{{news.created_at|date:'F d, Y - g:i A'}}"
+                     data-news-id="{{news.id}}"
+                     {% if news.image %} 
+                     data-image="{{news.image.url}}"
+                     {% else %}
+                     data-image="{% static 'teacher/images/nope.jpg' %}"
+                     {% endif %}>
+                    <div class="news-header">
+                        <h3 class="news-title">{{news.title}}</h3>
+                        <div class="news-actions">
+                            <button class="action-btn view-btn" onclick="viewNews(this)" title="View full article" aria-label="View {{news.title}}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="confirmDelete(this)" title="Delete article" aria-label="Delete {{news.title}}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="news-category">{{news.category}}</div>
+                    <div class="news-preview">{{news.description|truncatewords:25}}</div>
+                    <div class="news-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{news.created_at|date:"F d, Y - g:i A"}}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-newspaper"></i>
+                    <h3>No news articles yet</h3>
+                    <p>Start by creating your first news article using the form on the left. Share important updates, events, and announcements with your community.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- News View Modal -->
+<div class="modal-overlay" id="viewModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('viewModal')" aria-label="Close modal">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div id="modalImageContainer" style="display: none;">
+            <img class="modal-image" id="modalImage" alt="News Image">
+        </div>
+        
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <div class="modal-category" id="modalCategory"></div>
+        <div class="modal-content-text" id="modalContent"></div>
+        <div class="modal-date">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="modalDate"></span>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay delete-modal" id="deleteModal" role="dialog" aria-labelledby="deleteModalTitle" aria-modal="true">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('deleteModal')" aria-label="Close modal">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="delete-modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h3 class="delete-modal-title" id="deleteModalTitle">Delete News Article</h3>
+        <p class="delete-modal-text">
+            Are you sure you want to delete this news article? This action cannot be undone.
+        </p>
+        
+        <div class="delete-modal-actions">
+            <form method="post" action="{% url "teacher:delete_news" %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="news_id" id="deleteNewsId">
+                <button type="submit" class="delete-confirm-btn">
+                    <i class="fas fa-trash"></i>
+                    Delete Article
+                </button>
+            </form>
+            <button type="button" class="delete-cancel-btn" onclick="closeModal('deleteModal')">
+                <i class="fas fa-times"></i>
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('News management script loaded'); // Debug log
+
+    // DOM elements
+    const searchInput = document.getElementById('searchInput');
+    const searchClear = document.getElementById('searchClear');
+    const searchResults = document.getElementById('searchResults');
+    const newsList = document.getElementById('newsList');
+    const fileInput = document.getElementById('id_image');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+    const fileUploadLabel = document.querySelector('.file-upload-label span');
+
+    let allNewsItems = [];
+    let currentSearchTerm = '';
+    let originalNewsListHTML = ''; // Store original HTML
+
+    // Initialize news items array and preserve original HTML
+    function initializeNewsItems() {
+        // Store the original HTML content of the news list
+        originalNewsListHTML = newsList.innerHTML;
+        
+        const newsItems = newsList.querySelectorAll('.news-item');
+        console.log('Found news items:', newsItems.length); // Debug log
+        
+        allNewsItems = Array.from(newsItems).map(item => ({
+            element: item,
+            title: item.dataset.title ? item.dataset.title.toLowerCase() : '',
+            content: item.dataset.content ? item.dataset.content.toLowerCase() : '',
+            category: item.dataset.category ? item.dataset.category.toLowerCase() : '',
+            date: item.dataset.date || '',
+            newsId: item.dataset.newsId || ''
+        }));
+        
+        console.log('Initialized news items:', allNewsItems.length); // Debug log
+        console.log('Original HTML preserved'); // Debug log
+    }
+
+    // File upload functionality
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file (JPG, PNG, WebP).');
+                    this.value = '';
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB. Please choose a smaller image.');
+                    this.value = '';
+                    return;
+                }
+                
+                fileName.textContent = file.name;
+                filePreview.classList.add('show');
+                if (fileUploadLabel) {
+                    fileUploadLabel.textContent = '✓ Image selected';
+                }
+            } else {
+                resetFileInput();
+            }
+        });
+
+        if (removeFile) {
+            removeFile.addEventListener('click', function() {
+                fileInput.value = '';
+                resetFileInput();
+            });
+        }
+    }
+
+    function resetFileInput() {
+        if (filePreview) filePreview.classList.remove('show');
+        if (fileUploadLabel) {
+            fileUploadLabel.textContent = 'Click to upload image or drag and drop';
+        }
+    }
+
+    // Enhanced search functionality with proper restoration
+    function performSearch(searchTerm) {
+        console.log('Performing search for:', searchTerm); // Debug log
+        
+        currentSearchTerm = searchTerm.toLowerCase().trim();
+        
+        if (currentSearchTerm === '') {
+            showAllNews();
+            if (searchClear) searchClear.classList.remove('show');
+            if (searchResults) searchResults.classList.remove('show');
+            return;
+        }
+
+        if (searchClear) searchClear.classList.add('show');
+        
+        const filteredItems = allNewsItems.filter(item => {
+            return item.title.includes(currentSearchTerm) || 
+                   item.content.includes(currentSearchTerm) || 
+                   item.category.includes(currentSearchTerm);
+        });
+
+        console.log('Filtered items:', filteredItems.length); // Debug log
+        
+        displayFilteredNews(filteredItems);
+        updateSearchResults(filteredItems.length);
+    }
+
+    function showAllNews() {
+        console.log('Showing all news - restoring original HTML'); // Debug log
+        
+        // Restore the original HTML content
+        if (originalNewsListHTML) {
+            newsList.innerHTML = originalNewsListHTML;
+            
+            // Re-initialize the news items array after restoring HTML
+            const newsItems = newsList.querySelectorAll('.news-item');
+            allNewsItems = Array.from(newsItems).map(item => ({
+                element: item,
+                title: item.dataset.title ? item.dataset.title.toLowerCase() : '',
+                content: item.dataset.content ? item.dataset.content.toLowerCase() : '',
+                category: item.dataset.category ? item.dataset.category.toLowerCase() : '',
+                date: item.dataset.date || '',
+                newsId: item.dataset.newsId || ''
+            }));
+            
+            console.log('All news restored, items count:', allNewsItems.length); // Debug log
+        } else {
+            // Fallback: show all items if original HTML is not available
+            allNewsItems.forEach(item => {
+                if (item.element) {
+                    item.element.style.display = 'block';
+                }
+            });
+        }
+    }
+
+    function displayFilteredNews(filteredItems) {
+        console.log('Displaying filtered news:', filteredItems.length); // Debug log
+        
+        // Hide all items first
+        allNewsItems.forEach(item => {
+            if (item.element) {
+                item.element.style.display = 'none';
+            }
+        });
+
+        // Show filtered items
+        filteredItems.forEach(item => {
+            if (item.element) {
+                item.element.style.display = 'block';
+            }
+        });
+
+        // Show empty state if no results
+        if (filteredItems.length === 0) {
+            showEmptyState('search');
+        }
+    }
+
+    function updateSearchResults(count) {
+        if (searchResults && currentSearchTerm) {
+            searchResults.innerHTML = `
+                <i class="fas fa-search"></i>
+                Found <strong>${count}</strong> result${count !== 1 ? 's' : ''} for "<strong>${currentSearchTerm}</strong>"
+            `;
+            searchResults.classList.add('show');
+        } else if (searchResults) {
+            searchResults.classList.remove('show');
+        }
+    }
+
+    // Search event listeners
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            performSearch(this.value);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                performSearch('');
+                this.blur();
+            }
+        });
+    }
+
+    if (searchClear) {
+        searchClear.addEventListener('click', function() {
+            if (searchInput) {
+                searchInput.value = '';
+                performSearch('');
+                searchInput.focus();
+            }
+        });
+    }
+
+    // FIXED Modal functions - No more sliding to the right!
+    function openModal(modalId) {
+        console.log('Opening modal:', modalId); // Debug log
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            // Show the modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Force reflow
+            modal.offsetHeight;
+            
+            // Add show class to trigger animation
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        } else {
+            console.error('Modal not found:', modalId);
+        }
+    }
+
+    function closeModal(modalId) {
+        console.log('Closing modal:', modalId); // Debug log
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            // Add closing class to trigger close animation
+            modal.classList.add('closing');
+            modal.classList.remove('show');
+            
+            // Wait for animation to complete, then hide modal
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.classList.remove('closing');
+                document.body.style.overflow = '';
+            }, 250); // Match the CSS transition duration
+        }
+    }
+
+    // Make functions globally available
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+
+    // View news function
+    window.viewNews = function(button) {
+        console.log('View news clicked'); // Debug log
+        
+        const newsItem = button.closest('.news-item');
+        if (!newsItem) {
+            console.error('News item not found');
+            return;
+        }
+
+        const title = newsItem.dataset.title || '';
+        const category = newsItem.dataset.category || '';
+        const content = newsItem.dataset.content || '';
+        const date = newsItem.dataset.date || '';
+        const image = newsItem.dataset.image || '';
+
+        console.log('News data:', { title, category, content, date, image }); // Debug log
+
+        // Update modal content
+        const modalTitle = document.getElementById('modalTitle');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalContent = document.getElementById('modalContent');
+        const modalDate = document.getElementById('modalDate');
+        const modalImageContainer = document.getElementById('modalImageContainer');
+        const modalImage = document.getElementById('modalImage');
+
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalCategory) modalCategory.textContent = category;
+        if (modalContent) modalContent.textContent = content;
+        if (modalDate) modalDate.textContent = date;
+
+        // Handle image
+        if (modalImageContainer && modalImage) {
+            if (image && !image.includes('nope.jpg')) {
+                modalImage.src = image;
+                modalImage.alt = title;
+                modalImageContainer.style.display = 'block';
+            } else {
+                modalImageContainer.style.display = 'none';
+            }
+        }
+
+        openModal('viewModal');
+    };
+
+    // Delete confirmation function
+    window.confirmDelete = function(button) {
+        console.log('Delete button clicked'); // Debug log
+        
+        const newsItem = button.closest('.news-item');
+        if (!newsItem) {
+            console.error('News item not found');
+            return;
+        }
+
+        const newsId = newsItem.dataset.newsId || '';
+        const title = newsItem.dataset.title || '';
+        
+        console.log('Delete data:', { newsId, title }); // Debug log
+
+        const deleteNewsIdInput = document.getElementById('deleteNewsId');
+        const deleteModalText = document.querySelector('.delete-modal-text');
+
+        if (deleteNewsIdInput) {
+            deleteNewsIdInput.value = newsId;
+        }
+        
+        if (deleteModalText) {
+            deleteModalText.innerHTML = `
+                Are you sure you want to delete "<strong>${title}</strong>"? 
+                <br><br>
+                This action cannot be undone and will permanently remove this news article from your system.
+            `;
+        }
+        
+        openModal('deleteModal');
+    };
+
+    // Empty state functions - improved to not replace original content
+    function showEmptyState(type) {
+        if (!newsList) return;
+        
+        // Check if empty state already exists
+        const existingEmpty = newsList.querySelector('.empty-state');
+        if (existingEmpty) return;
+
+        let emptyHTML = '';
+        if (type === 'search') {
+            emptyHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>No results found</h3>
+                    <p>No news articles match your search criteria.<br>Try different keywords or check your spelling.</p>
+                </div>
+            `;
+        }
+        
+        // Add empty state without replacing existing content
+        newsList.insertAdjacentHTML('beforeend', emptyHTML);
+    }
+
+    // Modal event listeners for clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            const modalId = e.target.id;
+            closeModal(modalId);
+        }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const openModals = document.querySelectorAll('.modal-overlay.show');
+            openModals.forEach(modal => {
+                closeModal(modal.id);
+            });
+        }
+    });
+
+    // Initialize everything
+    initializeNewsItems();
+
+    // Auto-hide messages
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach((alert, index) => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }, 5000 + (index * 500));
+    });
+
+    console.log('News management script initialization complete'); // Debug log
+});
+</script>
+{% endblock %}

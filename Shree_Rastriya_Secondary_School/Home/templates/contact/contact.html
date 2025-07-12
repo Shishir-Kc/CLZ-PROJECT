@@ -1,0 +1,921 @@
+{% extends "Base/base.html" %}
+{% load static %}
+
+{% block title %}Shree Rastriya Mavi School - Contact Us{% endblock title %}
+
+{% block links %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Newsreader:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+    :root {
+        --primary-blue: #2563EB;
+        --secondary-blue: #3B82F6;
+        --dark-blue: #1E40AF;
+        --light-blue: #EFF6FF;
+        --accent-blue: #DBEAFE;
+        --primary-green: #059669;
+        --secondary-green: #10B981;
+        --dark-green: #047857;
+        --light-green: #ECFDF5;
+        --text-dark: #101518;
+        --text-light: #5c748a;
+        --text-white: #FFFFFF;
+        --bg-white: #FFFFFF;
+        --bg-light: #f8fafc;
+        --bg-gray: #eaedf1;
+        --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+    }
+
+    /* Full Screen Layout */
+    .contact-wrapper {
+        min-height: 100vh;
+        width: 100%;
+        background-color: var(--bg-light);
+    }
+
+    /* Content Container */
+    .content-container {
+        position: relative;
+        min-height: 100vh;
+        padding-top: 80px;
+    }
+
+    .contact-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* Header Section */
+    .contact-header {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+    }
+
+    .contact-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+
+    .contact-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-light);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Main Content Grid */
+    .contact-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        margin: 3rem 0;
+    }
+
+    /* Contact Information */
+    .contact-info {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        height: fit-content;
+    }
+
+    .info-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--bg-gray);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--gradient-primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .info-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .info-content p {
+        color: var(--text-light);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Contact Form */
+    .contact-form {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--bg-gray);
+        border-radius: 10px;
+        font-size: 1rem;
+        color: var(--text-dark);
+        background: var(--bg-light);
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-button {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        width: 100%;
+    }
+
+    .form-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+    }
+
+    .form-button:active {
+        transform: translateY(0);
+    }
+
+    .form-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Messages */
+    .alert {
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-success {
+        background: var(--light-green);
+        color: var(--dark-green);
+        border: 1px solid var(--secondary-green);
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+
+    /* Map Section */
+    .map-section {
+        margin: 3rem 0;
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .map-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .map-container {
+        width: 100%;
+        height: 300px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--bg-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+
+    /* Quick Contact Cards */
+    .quick-contact {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 3rem 0;
+    }
+
+    .quick-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid var(--bg-gray);
+    }
+
+    .quick-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        border-color: var(--primary-blue);
+    }
+
+    .quick-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--gradient-primary);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+    }
+
+    .quick-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .quick-description {
+        color: var(--text-light);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    .quick-action {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border: none;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .quick-action:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .contact-container {
+            padding: 0 1rem;
+        }
+
+        .contact-title {
+            font-size: 2rem;
+        }
+
+        .contact-content {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .contact-info,
+        .contact-form,
+        .map-section {
+            padding: 1.5rem;
+        }
+
+        .info-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .quick-contact {
+            grid-template-columns: 1fr;
+        }
+
+        .map-container {
+            height: 250px;
+        }
+    }
+
+    /* Loading Animation */
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Field Error Styles */
+    .field-error {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        animation: slideDown 0.3s ease;
+    }
+
+    /* Simple Toaster Notifications */
+    .toaster-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        pointer-events: none;
+    }
+
+    .toaster {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 300px;
+        max-width: 400px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        pointer-events: auto;
+    }
+
+    .toaster.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .toaster.success {
+        border-left-color: #10b981;
+        background: #f0fdf4;
+    }
+
+    .toaster.error {
+        border-left-color: #ef4444;
+        background: #fef2f2;
+    }
+
+    .toaster-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .toaster.success .toaster-icon {
+        color: #10b981;
+    }
+
+    .toaster.error .toaster-icon {
+        color: #ef4444;
+    }
+
+    .toaster-message {
+        flex: 1;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .toaster-close {
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+
+    .toaster-close:hover {
+        background: rgba(0, 0, 0, 0.1);
+        color: #374151;
+    }
+
+    @media (max-width: 768px) {
+        .toaster-container {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+        }
+        
+        .toaster {
+            min-width: unset;
+            max-width: unset;
+        }
+    }
+
+    /* Hide static Django messages when animated ones are shown */
+    .alert.hidden {
+        display: none !important;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 0.5rem;
+    }
+
+    /* Enhanced form input states */
+    .form-input.valid,
+    .form-textarea.valid,
+    .form-select.valid {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .form-input.invalid,
+    .form-textarea.invalid,
+    .form-select.invalid {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    /* Pulse animation for icons */
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    /* Slide down animation */
+    @keyframes slideDown {
+        from { 
+            opacity: 0; 
+            transform: translateY(-10px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+
+    /* Mobile responsive for animated messages */
+    @media (max-width: 768px) {
+        .animated-message {
+            right: 10px;
+            left: 10px;
+            min-width: unset;
+            transform: translateY(-100px);
+        }
+        
+        .animated-message.show {
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock links %}
+
+{% block content %}
+<div class="contact-wrapper">
+    <!-- Content Container -->
+    <div class="content-container">
+        <div class="contact-container">
+            <!-- Header -->
+            <div class="contact-header">
+                <h1 class="contact-title">Contact Us</h1>
+                <p class="contact-subtitle">
+                    We're here to help and answer any questions you might have. We look forward to hearing from you!
+                </p>
+            </div>
+
+            <!-- Quick Contact Cards -->
+            <div class="quick-contact">
+                <div class="quick-card">
+                    <div class="quick-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3 class="quick-title">Call Us</h3>
+                    <p class="quick-description">Speak directly with our admissions team</p>
+                    <button class="quick-action" onclick="window.location.href='tel:+977123456789'">
+                        Call Now
+                    </button>
+                </div>
+                <div class="quick-card">
+                    <div class="quick-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="quick-title">Email Us</h3>
+                    <p class="quick-description">Send us your questions anytime</p>
+                    <button class="quick-action" onclick="window.location.href='mailto:info@srmschool.edu.np'">
+                        Send Email
+                    </button>
+                </div>
+                <div class="quick-card">
+                    <div class="quick-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="quick-title">Visit Us</h3>
+                    <p class="quick-description">Come see our campus in person</p>
+                    <button class="quick-action" onclick="scrollToMap()">
+                        Get Directions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="contact-content">
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h2 class="info-title">
+                        <i class="fas fa-info-circle"></i>
+                        Contact Information
+                    </h2>
+                    
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Address</h4>
+                            <p>Shree Rastriya Mavi School<br>
+                            Kathmandu, Nepal<br>
+                            Postal Code: 44600</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Phone Numbers</h4>
+                            <p>Main Office: +977-1-123-4567<br>
+                            Admissions: +977-1-123-4568<br>
+                            Emergency: +977-1-123-4569</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Email Addresses</h4>
+                            <p>General: info@srmschool.edu.np<br>
+                            Admissions: admissions@srmschool.edu.np<br>
+                            Principal: principal@srmschool.edu.np</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Office Hours</h4>
+                            <p>Monday - Friday: 8:00 AM - 5:00 PM<br>
+                            Saturday: 9:00 AM - 2:00 PM<br>
+                            Sunday: Closed</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Follow Us</h4>
+                            <p>Stay connected on social media<br>
+                            Facebook | Instagram | Twitter</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <h2 class="form-title">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Us a Message
+                    </h2>
+
+                    <!-- Display Django Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- FIXED FORM - Removed preventDefault JavaScript -->
+                    <form id="contactForm" method="POST" >
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="form-label" for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email address" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="Enter your phone number">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="subject">Subject *</label>
+                            <select id="subject" name="subject" class="form-select" required>
+                                <option value="">Select a subject</option>
+                                <option value="admissions">Admissions Inquiry</option>
+                                <option value="academics">Academic Information</option>
+                                <option value="facilities">School Facilities</option>
+                                <option value="events">Events & Activities</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="message">Message *</label>
+                            <textarea id="message" name="message" class="form-textarea" placeholder="Enter your message here..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="form-button" id="submitBtn">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="map-section" id="mapSection">
+                <h2 class="map-title">
+                    <i class="fas fa-map"></i>
+                    Our Location
+                </h2>
+                 <div class="map-container">
+                  <iframe 
+                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1248.6907804214645!2d87.27042652554911!3d26.690047527061424!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef6b9af78281d3%3A0x6bc6c4de9d0fc68f!2sShree%20Rastriya%20Secondary%20School!5e0!3m2!1sen!2snp!4v1749894964011!5m2!1sen!2snp" 
+                 width="100%" 
+                 height="450" 
+                 style="border:0;" 
+                  allowfullscreen="" 
+                 loading="lazy" 
+                 referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    const phoneInput = document.getElementById('phone');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Create toaster container
+    function createToasterContainer() {
+        let container = document.querySelector('.toaster-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toaster-container';
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+
+    // Show toaster notification
+    function showToaster(message, type = 'success') {
+        const container = createToasterContainer();
+        
+        const toaster = document.createElement('div');
+        toaster.className = `toaster ${type}`;
+        
+        const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+        
+        toaster.innerHTML = `
+            <i class="${icon} toaster-icon"></i>
+            <span class="toaster-message">${message}</span>
+            <button class="toaster-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(toaster);
+        
+        // Show toaster
+        setTimeout(() => {
+            toaster.classList.add('show');
+        }, 100);
+        
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            toaster.classList.remove('show');
+            setTimeout(() => {
+                if (toaster.parentElement) {
+                    toaster.remove();
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    // Check for Django messages and show toasters
+    {% if messages %}
+        {% for message in messages %}
+            setTimeout(() => {
+                showToaster('{{ message|escapejs }}', '{{ message.tags }}');
+                // Hide the static Django message
+                const staticAlert = document.querySelector('.alert-{{ message.tags }}');
+                if (staticAlert) {
+                    staticAlert.style.display = 'none';
+                }
+            }, 500);
+        {% endfor %}
+    {% endif %}
+
+    // Phone number validation
+    phoneInput.addEventListener('input', function() {
+        const phoneValue = this.value.trim();
+        const phoneError = document.getElementById('phoneError');
+        
+        if (phoneError) {
+            phoneError.remove();
+        }
+        
+        if (phoneValue) {
+            if (!/^\d+$/.test(phoneValue)) {
+                this.style.borderColor = '#ef4444';
+                showFieldError(this, 'Phone number must contain only digits');
+                return;
+            }
+            
+            if (phoneValue.length < 10) {
+                this.style.borderColor = '#ef4444';
+                showFieldError(this, 'Phone number must be at least 10 digits');
+                return;
+            }
+            
+            this.style.borderColor = '#10b981';
+        } else {
+            this.style.borderColor = '';
+        }
+    });
+
+    function showFieldError(field, message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = field.id + 'Error';
+        errorDiv.className = 'field-error';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        field.parentNode.appendChild(errorDiv);
+    }
+
+    // Form submission
+    contactForm.addEventListener('submit', function(e) {
+        const phoneValue = phoneInput.value.trim();
+        
+        if (phoneValue) {
+            if (!/^\d+$/.test(phoneValue)) {
+                e.preventDefault();
+                phoneInput.focus();
+                showToaster('Phone number must contain only digits!', 'error');
+                return;
+            }
+            
+            if (phoneValue.length < 10) {
+                e.preventDefault();
+                phoneInput.focus();
+                showToaster('Phone number must be at least 10 digits!', 'error');
+                return;
+            }
+        }
+        
+        // Show loading
+        submitBtn.innerHTML = `
+            <span class="loading-spinner"></span>
+            Sending Message...
+        `;
+        submitBtn.disabled = true;
+    });
+
+    // Form validation
+    const inputs = document.querySelectorAll('.form-input, .form-textarea, .form-select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.style.borderColor = '#ef4444';
+            } else if (this.id !== 'phone') {
+                this.style.borderColor = '';
+            }
+        });
+
+        input.addEventListener('input', function() {
+            if (this.style.borderColor === 'rgb(239, 68, 68)' && this.id !== 'phone') {
+                this.style.borderColor = '';
+            }
+        });
+    });
+});
+
+function scrollToMap() {
+    document.getElementById('mapSection').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+</script>
+{% endblock content %}

@@ -1,0 +1,904 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Books - Student Portal{% endblock %}
+
+{% block header_title %}Books{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Books page specific styles */
+    .books-container {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .page-header h1 {
+        color: var(--text-primary);
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-header p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    /* Search bar */
+    .search-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-secondary);
+        padding: 0 16px 0 48px;
+        font-size: 16px;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(42, 123, 237, 0.1);
+    }
+    
+    .search-input::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+    
+    /* Filter section */
+    .filter-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-section h2 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .filter-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--bg-secondary);
+        border: none;
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .filter-button:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    .filter-button.active {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    /* Filter dropdown */
+    .filter-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: none;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .filter-dropdown.show {
+        display: block;
+    }
+    
+    .filter-option {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .filter-option:last-child {
+        border-bottom: none;
+    }
+    
+    .filter-option:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    .filter-option.selected {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    /* No results message */
+    .no-results {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        display: none;
+    }
+    
+    .no-results.show {
+        display: block;
+    }
+    
+    .no-results svg {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        opacity: 0.5;
+    }
+    
+    .no-results h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+    
+    .no-results p {
+        font-size: 0.875rem;
+    }
+    
+    /* Books table for desktop */
+    .books-table-container {
+        display: none;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .books-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .books-table th {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: left;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .books-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    .books-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .books-table tr:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    .book-title {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .book-cover {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .download-link {
+        color: var(--accent-color);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .download-link:hover {
+        text-decoration: underline;
+    }
+    
+    /* Books cards for mobile */
+    .books-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .book-card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .book-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .book-card-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .book-info h3 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .book-info p {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        margin: 0;
+    }
+    
+    .book-card-details {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .detail-label {
+        color: var(--text-primary);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .detail-value {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+    }
+    
+    .book-card-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .download-button {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .download-button:hover {
+        background-color: var(--accent-hover);
+    }
+    
+    /* Active filters display */
+    .active-filters {
+        margin-bottom: 1rem;
+        display: none;
+    }
+    
+    .active-filters.show {
+        display: block;
+    }
+    
+    .active-filters h3 {
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .filter-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .filter-tag {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .filter-tag button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .filter-tag button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Responsive styles */
+    @media (min-width: 768px) {
+        .books-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .books-cards {
+            display: none;
+        }
+        
+        .books-table-container {
+            display: block;
+        }
+    }
+    
+    /* Dark mode adjustments */
+    [data-theme="dark"] .books-table th {
+        background-color: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .books-table tr:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    [data-theme="dark"] .book-card {
+        background-color: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .filter-dropdown {
+        background-color: var(--bg-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="books-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Books</h1>
+        <p>Explore a wide range of textbooks and study materials for your courses.</p>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="search-container">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+        </svg>
+        <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search by title, class, or subject"
+            id="bookSearch"
+        />
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h2>Filter by</h2>
+        <div class="filter-buttons">
+            <div class="filter-button" id="subjectFilter">
+                Subject
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path>
+                </svg>
+                <div class="filter-dropdown" id="subjectDropdown">
+                    <div class="filter-option" data-value="">All Subjects</div>
+                    <div class="filter-option" data-value="Biology">Biology</div>
+                    <div class="filter-option" data-value="Mathematics">Mathematics</div>
+                    <div class="filter-option" data-value="History">History</div>
+                    <div class="filter-option" data-value="Literature">Literature</div>
+                    <div class="filter-option" data-value="Physics">Physics</div>
+                </div>
+            </div>
+            <div class="filter-button" id="timeFilter">
+                Time Period
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path>
+                </svg>
+                <div class="filter-dropdown" id="timeDropdown">
+                    <div class="filter-option" data-value="">All Time Periods</div>
+                    <div class="filter-option" data-value="Fall 2023">Fall 2023</div>
+                    <div class="filter-option" data-value="Spring 2024">Spring 2024</div>
+                    <div class="filter-option" data-value="Summer 2024">Summer 2024</div>
+                    <div class="filter-option" data-value="Fall 2024">Fall 2024</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Filters -->
+    <div class="active-filters" id="activeFilters">
+        <h3>Active Filters:</h3>
+        <div class="filter-tags" id="filterTags"></div>
+    </div>
+    
+    <!-- No Results Message -->
+    <div class="no-results" id="noResults">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+        </svg>
+        <h3>Book Not Found</h3>
+        <p>No books match your search criteria. Try adjusting your search terms or filters.</p>
+    </div>
+    
+    <!-- Desktop Table View -->
+    <div class="books-table-container" id="booksTable">
+        <table class="books-table">
+            <thead>
+                <tr>
+                    <th>Cover</th>
+                    <th>Title</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-title="Biology for Beginners" data-class="Biology 101" data-subject="Biology" data-date="Fall 2023">
+                    <td>
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGYKTp718VFVS_5SGphFej8q6KqYtPK8Li26wvVABvfvgcrztixatGqKEMamxYGEk72k-lkHfyTKcVokgS5ZvOCjvHg610czhd4v5MDd6bxm96kDXAtTwCyfIPyQtai6tgzooBd9MxK9WRh5wY0KFrZjymlKb7fuDf79EfNYWviJy_kcS-YwWsa332Qej-ZtZl9YTluGwAAetwccW_i8POJ-QhU2uqBkefjLykT8gsRJLWSCc1idcOO_9Ty2dNjFoPYDdQoWvCptvh" alt="Biology for Beginners" class="book-cover">
+                    </td>
+                    <td class="book-title">Biology for Beginners</td>
+                    <td>Biology 101</td>
+                    <td>Biology</td>
+                    <td>An introductory course covering basic biological principles.</td>
+                    <td>Fall 2023</td>
+                    <td><a href="#" class="download-link">Download</a></td>
+                </tr>
+                <tr data-title="Calculus Essentials" data-class="Math 201" data-subject="Mathematics" data-date="Spring 2024">
+                    <td>
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBe8orB7Y_6gsvyUsSZjpMpuX6_tqD6I8uQae4-cczk_3gnDutDTPNDigEUNXV3SHlC2ywvslUp8hWy71UtuAMdt-2RpFJa6538AKefiy6IoX4mEHkZNxoAIWjXRk736d43oWhUxqxQrLSY0-XNUM2QbgB3I04SMoGzSm8lze1PZYbAicdUa9S7up509NwytoGIJQlr-IDArppcGRx8L-3EZe-WLNUcXP1FN9jpgvC8CjjRiWhntXtaLg9NNkeRtFp7HwYjlFXAGbRZ" alt="Calculus Essentials" class="book-cover">
+                    </td>
+                    <td class="book-title">Calculus Essentials</td>
+                    <td>Math 201</td>
+                    <td>Mathematics</td>
+                    <td>A comprehensive study of calculus and its applications.</td>
+                    <td>Spring 2024</td>
+                    <td><a href="#" class="download-link">Download</a></td>
+                </tr>
+                <tr data-title="World History: A Comprehensive Guide" data-class="History 301" data-subject="History" data-date="Fall 2023">
+                    <td>
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuot6IDB97TiNmqp-vjxCgvAdF74JRSF6ZFJ9GorASv5D4fsDZOsOfIR6VhZ9TowMW1MJYaajYyW8OuE-_empS0yvw3COmPevTxRZWpAowWFMBI4Q3zTZKEq1fTC6FLhQUxYEEwzgncWOk24j37PRazC0T-8RSXYl3I_3WfshZSGgz0wphM8am_pbV3vl8GUFiEEQIQ0pMan9hACc4VdA8J-svNi6eH2J7nVBuw9DmIBDU0z_VU_isuABvaVaON8NBJUDuBZztZZsZ" alt="World History" class="book-cover">
+                    </td>
+                    <td class="book-title">World History: A Comprehensive Guide</td>
+                    <td>History 301</td>
+                    <td>History</td>
+                    <td>An overview of world history from ancient times to the present.</td>
+                    <td>Fall 2023</td>
+                    <td><a href="#" class="download-link">Download</a></td>
+                </tr>
+                <tr data-title="Literary Classics" data-class="English 202" data-subject="Literature" data-date="Spring 2024">
+                    <td>
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLBXm6tXHtdJni0e62DcD4p400Ojh41LYXt6YCLvWXq2l0XG-Ya3HCaWHca5HvZfRIoODK3EUhcpJ7uaMPhrDYwYhFyfflM4P6_xYc_8HeON2EOycpqI1QJAOrNUTLXRLkg70iIHQckREswTWHJ3Vd-qGJTIWKjYUWCKi5hxadhigRqlQDrb_AXmiyNxK0bbX0eu51w8hVcw6jlxG__CgaEpNL8kEJsYmQjXPxImD-dDNV906yrusRu2iOESV0DNorcnfdXpTS_84L" alt="Literary Classics" class="book-cover">
+                    </td>
+                    <td class="book-title">Literary Classics</td>
+                    <td>English 202</td>
+                    <td>Literature</td>
+                    <td>A selection of classic literary works from various periods.</td>
+                    <td>Spring 2024</td>
+                    <td><a href="#" class="download-link">Download</a></td>
+                </tr>
+                <tr data-title="Physics Fundamentals" data-class="Physics 101" data-subject="Physics" data-date="Fall 2023">
+                    <td>
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTDuGPdynONGsgr5yx7-htakFPtfU6xg9zPG9ub99vnJv8tG7rCDwgjUGkfimM8fDNJ50NMKVeh9W7GY8xbLN8wOWJ09i_HA7GagJwqsMpY3y59KqeQykFTDCUh0OwaBJhTFrj0PfjuBBbi-t5twK3nFpkahjEFZv5Ab6Vi0WlTzC9f9yqVftqPR_iNl99u4jI7JQN3P93X-4Z4Wk3YEt4W7FwLDJMLIObXcCNA64pkQQvs_THCT28wkKVt5a1oqjodJYVLRpq_Zmc" alt="Physics Fundamentals" class="book-cover">
+                    </td>
+                    <td class="book-title">Physics Fundamentals</td>
+                    <td>Physics 101</td>
+                    <td>Physics</td>
+                    <td>Fundamental concepts in physics, including mechanics and thermodynamics.</td>
+                    <td>Fall 2023</td>
+                    <td><a href="#" class="download-link">Download</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Mobile Card View -->
+    <div class="books-cards" id="booksCards">
+        <!-- Book 1 -->
+        <div class="book-card" data-title="Biology for Beginners" data-class="Biology 101" data-subject="Biology" data-date="Fall 2023">
+            <div class="book-card-header">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGYKTp718VFVS_5SGphFej8q6KqYtPK8Li26wvVABvfvgcrztixatGqKEMamxYGEk72k-lkHfyTKcVokgS5ZvOCjvHg610czhd4v5MDd6bxm96kDXAtTwCyfIPyQtai6tgzooBd9MxK9WRh5wY0KFrZjymlKb7fuDf79EfNYWviJy_kcS-YwWsa332Qej-ZtZl9YTluGwAAetwccW_i8POJ-QhU2uqBkefjLykT8gsRJLWSCc1idcOO_9Ty2dNjFoPYDdQoWvCptvh" alt="Biology for Beginners" class="book-cover">
+                <div class="book-info">
+                    <h3>Biology for Beginners</h3>
+                    <p>Biology 101</p>
+                </div>
+            </div>
+            <div class="book-card-details">
+                <div class="detail-label">Subject:</div>
+                <div class="detail-value">Biology</div>
+                
+                <div class="detail-label">Description:</div>
+                <div class="detail-value">An introductory course covering basic biological principles.</div>
+                
+                <div class="detail-label">Date:</div>
+                <div class="detail-value">Fall 2023</div>
+            </div>
+            <div class="book-card-footer">
+                <button class="download-button">Download</button>
+            </div>
+        </div>
+        
+        <!-- Book 2 -->
+        <div class="book-card" data-title="Calculus Essentials" data-class="Math 201" data-subject="Mathematics" data-date="Spring 2024">
+            <div class="book-card-header">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBe8orB7Y_6gsvyUsSZjpMpuX6_tqD6I8uQae4-cczk_3gnDutDTPNDigEUNXV3SHlC2ywvslUp8hWy71UtuAMdt-2RpFJa6538AKefiy6IoX4mEHkZNxoAIWjXRk736d43oWhUxqxQrLSY0-XNUM2QbgB3I04SMoGzSm8lze1PZYbAicdUa9S7up509NwytoGIJQlr-IDArppcGRx8L-3EZe-WLNUcXP1FN9jpgvC8CjjRiWhntXtaLg9NNkeRtFp7HwYjlFXAGbRZ" alt="Calculus Essentials" class="book-cover">
+                <div class="book-info">
+                    <h3>Calculus Essentials</h3>
+                    <p>Math 201</p>
+                </div>
+            </div>
+            <div class="book-card-details">
+                <div class="detail-label">Subject:</div>
+                <div class="detail-value">Mathematics</div>
+                
+                <div class="detail-label">Description:</div>
+                <div class="detail-value">A comprehensive study of calculus and its applications.</div>
+                
+                <div class="detail-label">Date:</div>
+                <div class="detail-value">Spring 2024</div>
+            </div>
+            <div class="book-card-footer">
+                <button class="download-button">Download</button>
+            </div>
+        </div>
+        
+        <!-- Book 3 -->
+        <div class="book-card" data-title="World History: A Comprehensive Guide" data-class="History 301" data-subject="History" data-date="Fall 2023">
+            <div class="book-card-header">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuot6IDB97TiNmqp-vjxCgvAdF74JRSF6ZFJ9GorASv5D4fsDZOsOfIR6VhZ9TowMW1MJYaajYyW8OuE-_empS0yvw3COmPevTxRZWpAowWFMBI4Q3zTZKEq1fTC6FLhQUxYEEwzgncWOk24j37PRazC0T-8RSXYl3I_3WfshZSGgz0wphM8am_pbV3vl8GUFiEEQIQ0pMan9hACc4VdA8J-svNi6eH2J7nVBuw9DmIBDU0z_VU_isuABvaVaON8NBJUDuBZztZZsZ" alt="World History" class="book-cover">
+                <div class="book-info">
+                    <h3>World History: A Comprehensive Guide</h3>
+                    <p>History 301</p>
+                </div>
+            </div>
+            <div class="book-card-details">
+                <div class="detail-label">Subject:</div>
+                <div class="detail-value">History</div>
+                
+                <div class="detail-label">Description:</div>
+                <div class="detail-value">An overview of world history from ancient times to the present.</div>
+                
+                <div class="detail-label">Date:</div>
+                <div class="detail-value">Fall 2023</div>
+            </div>
+            <div class="book-card-footer">
+                <button class="download-button">Download</button>
+            </div>
+        </div>
+        
+        <!-- Book 4 -->
+        <div class="book-card" data-title="Literary Classics" data-class="English 202" data-subject="Literature" data-date="Spring 2024">
+            <div class="book-card-header">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLBXm6tXHtdJni0e62DcD4p400Ojh41LYXt6YCLvWXq2l0XG-Ya3HCaWHca5HvZfRIoODK3EUhcpJ7uaMPhrDYwYhFyfflM4P6_xYc_8HeON2EOycpqI1QJAOrNUTLXRLkg70iIHQckREswTWHJ3Vd-qGJTIoODK3EUhcpJ7uaMPhrDYwYhFyfflM4P6_xYc_8HeON2EOycpqI1QJAOrNUTLXRLkg70iIHQckREswTWHJ3Vd-qGJTIWKjYUWCKi5hxadhigRqlQDrb_AXmiyNxK0bbX0eu51w8hVcw6jlxG__CgaEpNL8kEJsYmQjXPxImD-dDNV906yrusRu2iOESV0DNorcnfdXpTS_84L" alt="Literary Classics" class="book-cover">
+                <div class="book-info">
+                    <h3>Literary Classics</h3>
+                    <p>English 202</p>
+                </div>
+            </div>
+            <div class="book-card-details">
+                <div class="detail-label">Subject:</div>
+                <div class="detail-value">Literature</div>
+                
+                <div class="detail-label">Description:</div>
+                <div class="detail-value">A selection of classic literary works from various periods.</div>
+                
+                <div class="detail-label">Date:</div>
+                <div class="detail-value">Spring 2024</div>
+            </div>
+            <div class="book-card-footer">
+                <button class="download-button">Download</button>
+            </div>
+        </div>
+        
+        <!-- Book 5 -->
+        <div class="book-card" data-title="Physics Fundamentals" data-class="Physics 101" data-subject="Physics" data-date="Fall 2023">
+            <div class="book-card-header">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTDuGPdynONGsgr5yx7-htakFPtfU6xg9zPG9ub99vnJv8tG7rCDwgjUGkfimM8fDNJ50NMKVeh9W7GY8xbLN8wOWJ09i_HA7GagJwqsMpY3y59KqeQykFTDCUh0OwaBJhTFrj0PfjuBBbi-t5twK3nFpkahjEFZv5Ab6Vi0WlTzC9f9yqVftqPR_iNl99u4jI7JQN3P93X-4Z4Wk3YEt4W7FwLDJMLIObXcCNA64pkQQvs_THCT28wkKVt5a1oqjodJYVLRpq_Zmc" alt="Physics Fundamentals" class="book-cover">
+                <div class="book-info">
+                    <h3>Physics Fundamentals</h3>
+                    <p>Physics 101</p>
+                </div>
+            </div>
+            <div class="book-card-details">
+                <div class="detail-label">Subject:</div>
+                <div class="detail-value">Physics</div>
+                
+                <div class="detail-label">Description:</div>
+                <div class="detail-value">Fundamental concepts in physics, including mechanics and thermodynamics.</div>
+                
+                <div class="detail-label">Date:</div>
+                <div class="detail-value">Fall 2023</div>
+            </div>
+            <div class="book-card-footer">
+                <button class="download-button">Download</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Global variables
+    let activeFilters = {
+        subject: '',
+        time: ''
+    };
+    
+    // Elements
+    const searchInput = document.getElementById('bookSearch');
+    const tableRows = document.querySelectorAll('.books-table tbody tr');
+    const bookCards = document.querySelectorAll('.book-card');
+    const noResults = document.getElementById('noResults');
+    const booksTable = document.getElementById('booksTable');
+    const booksCards = document.getElementById('booksCards');
+    const activeFiltersDiv = document.getElementById('activeFilters');
+    const filterTags = document.getElementById('filterTags');
+    
+    // Filter elements
+    const subjectFilter = document.getElementById('subjectFilter');
+    const timeFilter = document.getElementById('timeFilter');
+    const subjectDropdown = document.getElementById('subjectDropdown');
+    const timeDropdown = document.getElementById('timeDropdown');
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        applyFilters();
+    });
+    
+    // Filter dropdown functionality
+    subjectFilter.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleDropdown(subjectDropdown);
+        closeDropdown(timeDropdown);
+    });
+    
+    timeFilter.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleDropdown(timeDropdown);
+        closeDropdown(subjectDropdown);
+    });
+    
+    // Filter option selection
+    subjectDropdown.addEventListener('click', function(e) {
+        if (e.target.classList.contains('filter-option')) {
+            selectFilterOption('subject', e.target);
+            closeDropdown(subjectDropdown);
+        }
+    });
+    
+    timeDropdown.addEventListener('click', function(e) {
+        if (e.target.classList.contains('filter-option')) {
+            selectFilterOption('time', e.target);
+            closeDropdown(timeDropdown);
+        }
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function() {
+        closeDropdown(subjectDropdown);
+        closeDropdown(timeDropdown);
+    });
+    
+    // Functions
+    function toggleDropdown(dropdown) {
+        dropdown.classList.toggle('show');
+    }
+    
+    function closeDropdown(dropdown) {
+        dropdown.classList.remove('show');
+    }
+    
+    function selectFilterOption(filterType, option) {
+        const value = option.getAttribute('data-value');
+        const text = option.textContent;
+        
+        // Update active filters
+        activeFilters[filterType] = value;
+        
+        // Update UI
+        updateFilterButton(filterType, text, value);
+        updateActiveFilters();
+        applyFilters();
+    }
+    
+    function updateFilterButton(filterType, text, value) {
+        const button = filterType === 'subject' ? subjectFilter : timeFilter;
+        const textNode = button.firstChild;
+        
+        if (value) {
+            textNode.textContent = text;
+            button.classList.add('active');
+        } else {
+            textNode.textContent = filterType === 'subject' ? 'Subject' : 'Time Period';
+            button.classList.remove('active');
+        }
+        
+        // Update selected option in dropdown
+        const dropdown = filterType === 'subject' ? subjectDropdown : timeDropdown;
+        dropdown.querySelectorAll('.filter-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        dropdown.querySelector(`[data-value="${value}"]`).classList.add('selected');
+    }
+    
+    function updateActiveFilters() {
+        filterTags.innerHTML = '';
+        let hasActiveFilters = false;
+        
+        Object.keys(activeFilters).forEach(filterType => {
+            const value = activeFilters[filterType];
+            if (value) {
+                hasActiveFilters = true;
+                const tag = document.createElement('div');
+                tag.className = 'filter-tag';
+                tag.innerHTML = `
+                    ${filterType === 'subject' ? 'Subject' : 'Time'}: ${value}
+                    <button onclick="removeFilter('${filterType}')">×</button>
+                `;
+                filterTags.appendChild(tag);
+            }
+        });
+        
+        if (hasActiveFilters) {
+            activeFiltersDiv.classList.add('show');
+        } else {
+            activeFiltersDiv.classList.remove('show');
+        }
+    }
+    
+    // Make removeFilter function global
+    window.removeFilter = function(filterType) {
+        activeFilters[filterType] = '';
+        updateFilterButton(filterType, filterType === 'subject' ? 'Subject' : 'Time Period', '');
+        updateActiveFilters();
+        applyFilters();
+    };
+    
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleCount = 0;
+        
+        // Filter table rows (desktop)
+        tableRows.forEach(row => {
+            if (matchesFilters(row, searchTerm)) {
+                row.style.display = 'table-row';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Filter cards (mobile)
+        bookCards.forEach(card => {
+            if (matchesFilters(card, searchTerm)) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        if (visibleCount === 0) {
+            noResults.classList.add('show');
+            booksTable.style.display = 'none';
+            booksCards.style.display = 'none';
+        } else {
+            noResults.classList.remove('show');
+            checkScreenSize(); // Restore proper display based on screen size
+        }
+    }
+    
+    function matchesFilters(element, searchTerm) {
+        const title = element.getAttribute('data-title').toLowerCase();
+        const className = element.getAttribute('data-class').toLowerCase();
+        const subject = element.getAttribute('data-subject');
+        const date = element.getAttribute('data-date');
+        
+        // Check search term
+        const matchesSearch = !searchTerm || 
+            title.includes(searchTerm) || 
+            className.includes(searchTerm) || 
+            subject.toLowerCase().includes(searchTerm);
+        
+        // Check subject filter
+        const matchesSubject = !activeFilters.subject || subject === activeFilters.subject;
+        
+        // Check time filter
+        const matchesTime = !activeFilters.time || date === activeFilters.time;
+        
+        return matchesSearch && matchesSubject && matchesTime;
+    }
+    
+    // Download button functionality
+    const downloadButtons = document.querySelectorAll('.download-button, .download-link');
+    downloadButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const bookElement = this.closest('[data-title]');
+            const bookTitle = bookElement.getAttribute('data-title');
+            alert(`Download started for: ${bookTitle}`);
+        });
+    });
+    
+    // Responsive functionality
+    function checkScreenSize() {
+        const booksCardsEl = document.querySelector('.books-cards');
+        const booksTableEl = document.querySelector('.books-table-container');
+        
+        if (window.innerWidth < 768) {
+            booksCardsEl.style.display = 'flex';
+            booksTableEl.style.display = 'none';
+        } else {
+            booksCardsEl.style.display = 'none';
+            booksTableEl.style.display = 'block';
+        }
+    }
+    
+    // Run on load and resize
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+});
+</script>
+{% endblock %}

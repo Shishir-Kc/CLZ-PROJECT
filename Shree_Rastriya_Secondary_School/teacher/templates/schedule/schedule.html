@@ -1,0 +1,1346 @@
+{% extends 'teach_base/base.html' %}
+{% load static %}
+
+{% block title %}My Schedule - Teacher Dashboard{% endblock %}
+{% block user_avatar_mobile %} {{teacher.teacher_image.url}} {% endblock %}
+{% block user_avatar %} {{teacher.teacher_image.url}} {% endblock %}
+
+{% block header_title %}My Schedule{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Schedule page specific styles */
+    .schedule-container {
+        padding: 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .schedule-header {
+        margin-bottom: 2rem;
+    }
+    
+    .schedule-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .schedule-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Week Toggle */
+    .week-toggle {
+        display: flex;
+        background-color: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 2rem;
+        max-width: 300px;
+    }
+    
+    .week-toggle input[type="radio"] {
+        display: none;
+    }
+    
+    .week-toggle label {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+    
+    .week-toggle input[type="radio"]:checked + label {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Schedule Table */
+    .schedule-table-container {
+        background: var(--bg-primary);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        overflow-x: auto;
+    }
+    
+    .schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+    
+    .schedule-table th {
+        background-color: var(--bg-secondary);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+    
+    .schedule-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: top;
+        font-size: 0.875rem;
+    }
+    
+    .schedule-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .time-cell {
+        font-weight: 600;
+        color: var(--text-primary);
+        background-color: var(--bg-tertiary);
+        min-width: 100px;
+        white-space: nowrap;
+    }
+    
+    .class-cell {
+        color: var(--text-secondary);
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 150px;
+    }
+    
+    .class-cell:hover {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    
+    .class-info {
+        line-height: 1.4;
+    }
+    
+    .class-subject {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .class-details {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+    
+    .lunch-break {
+        background-color: var(--accent-color);
+        color: white;
+        text-align: center;
+        font-weight: 500;
+        border-radius: 8px;
+        margin: 0.25rem;
+        padding: 0.5rem;
+    }
+    
+    .free-period {
+        background-color: var(--bg-secondary);
+        color: var(--text-secondary);
+        text-align: center;
+        font-style: italic;
+        border-radius: 8px;
+        margin: 0.25rem;
+        padding: 0.5rem;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .schedule-container {
+            padding: 0.75rem;
+        }
+        
+        .schedule-title {
+            font-size: 1.75rem;
+        }
+        
+        .week-toggle {
+            max-width: 100%;
+        }
+        
+        /* Mobile Card View */
+        .schedule-table-container {
+            display: none;
+        }
+        
+        .mobile-schedule {
+            display: block;
+        }
+        
+        .day-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+        
+        .day-header {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .day-schedule {
+            padding: 0;
+        }
+        
+        .time-slot {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .time-slot:last-child {
+            border-bottom: none;
+        }
+        
+        .slot-time {
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 80px;
+            font-size: 0.875rem;
+        }
+        
+        .slot-class {
+            flex: 1;
+            margin-left: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        
+        .slot-class:hover {
+            background-color: var(--bg-secondary);
+        }
+    }
+    
+    @media (min-width: 769px) {
+        .mobile-schedule {
+            display: none;
+        }
+    }
+    
+    /* Current time indicator */
+    .current-time-row {
+        background-color: rgba(59, 130, 246, 0.1);
+        border-left: 4px solid var(--accent-color);
+    }
+    
+    .current-time-row .time-cell {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    /* Class status indicators */
+    .class-status {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+    
+    .status-active {
+        background-color: #10b981;
+    }
+    
+    .status-upcoming {
+        background-color: #f59e0b;
+    }
+    
+    .status-completed {
+        background-color: #6b7280;
+    }
+    
+    /* Dark theme adjustments */
+    [data-theme="dark"] .lunch-break {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    [data-theme="dark"] .free-period {
+        background-color: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+    
+    /* Loading state */
+    .schedule-loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 400px;
+        color: var(--text-secondary);
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--accent-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 1rem;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Class detail modal styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        background: var(--bg-primary);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+    
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-close:hover {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    
+    .class-detail-info {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .detail-value {
+        color: var(--text-secondary);
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .btn-primary {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--accent-hover);
+        transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--bg-tertiary);
+        transform: translateY(-1px);
+    }
+
+    
+</style>
+{% endblock %}
+
+{% block page_title %}My Schedule{% endblock %}
+
+{% block content %}
+<div class="schedule-container">
+    <div class="schedule-header">
+        <h1 class="schedule-title">My Schedule</h1>
+        <p class="schedule-subtitle">View your weekly class schedule</p>
+        
+        <!-- Week Toggle -->
+        <div class="week-toggle">
+            <input type="radio" id="thisWeek" name="weekToggle" value="this" checked>
+            <label for="thisWeek">This Week</label>
+         
+            
+        </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div class="schedule-loading" id="scheduleLoading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Loading schedule...</span>
+    </div>
+    
+    <!-- Desktop Schedule Table -->
+    <div class="schedule-table-container" id="desktopSchedule">
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleTableBody">
+                <tr data-time="8:00">
+                    <td class="time-cell">8:00 AM</td>
+                    <td class="class-cell" data-class="math-7a" onclick="showClassDetails('math-7a', '8:00 AM', 'Monday')">
+                        <div class="class-info">
+                            <div class="class-subject">Math Grade 7</div>
+                            <div class="class-details">Section A • Room 201</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="science-8b" onclick="showClassDetails('science-8b', '8:00 AM', 'Tuesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Science Grade 8</div>
+                            <div class="class-details">Section B • Room 202</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="math-7a" onclick="showClassDetails('math-7a', '8:00 AM', 'Wednesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Math Grade 7</div>
+                            <div class="class-details">Section A • Room 201</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="science-8b" onclick="showClassDetails('science-8b', '8:00 AM', 'Thursday')">
+                        <div class="class-info">
+                            <div class="class-subject">Science Grade 8</div>
+                            <div class="class-details">Section B • Room 202</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="math-7a" onclick="showClassDetails('math-7a', '8:00 AM', 'Friday')">
+                        <div class="class-info">
+                            <div class="class-subject">Math Grade 7</div>
+                            <div class="class-details">Section A • Room 201</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                </tr>
+                <tr data-time="9:00">
+                    <td class="time-cell">9:00 AM</td>
+                    <td class="class-cell" data-class="math-7a" onclick="showClassDetails('math-7a', '9:00 AM', 'Monday')">
+                        <div class="class-info">
+                            <div class="class-subject">Math Grade 7</div>
+                            <div class="class-details">Section A • Room 201</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="science-8b" onclick="showClassDetails('science-8b', '9:00 AM', 'Tuesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Science Grade 8</div>
+                            <div class="class-details">Section B • Room 202</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="math-7a" onclick="showClassDetails('math-7a', '9:00 AM', 'Wednesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Math Grade 7</div>
+                            <div class="class-details">Section A • Room 201</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="science-8b" onclick="showClassDetails('science-8b', '9:00 AM', 'Thursday')">
+                        <div class="class-info">
+                            <div class="class-subject">Science Grade 8</div>
+                            <div class="class-details">Section B • Room 202</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="math-7a" onclick="showClassDetails('math-7a', '9:00 AM', 'Friday')">
+                        <div class="class-info">
+                            <div class="class-subject">Math Grade 7</div>
+                            <div class="class-details">Section A • Room 201</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                </tr>
+                <tr data-time="10:00" class="current-time-row">
+                    <td class="time-cell">10:00 AM</td>
+                    <td class="class-cell" data-class="history-9c" onclick="showClassDetails('history-9c', '10:00 AM', 'Monday')">
+                        <div class="class-info">
+                            <div class="class-subject">History Grade 9</div>
+                            <div class="class-details">Section C • Room 203</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="english-10d" onclick="showClassDetails('english-10d', '10:00 AM', 'Tuesday')">
+                        <div class="class-info">
+                            <div class="class-subject">English Grade 10</div>
+                            <div class="class-details">Section D • Room 204</div>
+                        </div>
+                        <div class="class-status status-active"></div>
+                    </td>
+                    <td class="class-cell" data-class="history-9c" onclick="showClassDetails('history-9c', '10:00 AM', 'Wednesday')">
+                        <div class="class-info">
+                            <div class="class-subject">History Grade 9</div>
+                            <div class="class-details">Section C • Room 203</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="english-10d" onclick="showClassDetails('english-10d', '10:00 AM', 'Thursday')">
+                        <div class="class-info">
+                            <div class="class-subject">English Grade 10</div>
+                            <div class="class-details">Section D • Room 204</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="history-9c" onclick="showClassDetails('history-9c', '10:00 AM', 'Friday')">
+                        <div class="class-info">
+                            <div class="class-subject">History Grade 9</div>
+                            <div class="class-details">Section C • Room 203</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                </tr>
+                <tr data-time="11:00">
+                    <td class="time-cell">11:00 AM</td>
+                    <td class="class-cell" data-class="history-9c" onclick="showClassDetails('history-9c', '11:00 AM', 'Monday')">
+                        <div class="class-info">
+                            <div class="class-subject">History Grade 9</div>
+                            <div class="class-details">Section C • Room 203</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="english-10d" onclick="showClassDetails('english-10d', '11:00 AM', 'Tuesday')">
+                        <div class="class-info">
+                            <div class="class-subject">English Grade 10</div>
+                            <div class="class-details">Section D • Room 204</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="history-9c" onclick="showClassDetails('history-9c', '11:00 AM', 'Wednesday')">
+                        <div class="class-info">
+                            <div class="class-subject">History Grade 9</div>
+                            <div class="class-details">Section C • Room 203</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="english-10d" onclick="showClassDetails('english-10d', '11:00 AM', 'Thursday')">
+                        <div class="class-info">
+                            <div class="class-subject">English Grade 10</div>
+                            <div class="class-details">Section D • Room 204</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="history-9c" onclick="showClassDetails('history-9c', '11:00 AM', 'Friday')">
+                        <div class="class-info">
+                            <div class="class-subject">History Grade 9</div>
+                            <div class="class-details">Section C • Room 203</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                </tr>
+                <tr data-time="12:00">
+                    <td class="time-cell">12:00 PM</td>
+                    <td class="class-cell">
+                        <div class="lunch-break">Lunch Break</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="lunch-break">Lunch Break</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="lunch-break">Lunch Break</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="lunch-break">Lunch Break</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="lunch-break">Lunch Break</div>
+                    </td>
+                </tr>
+                <tr data-time="13:00">
+                    <td class="time-cell">1:00 PM</td>
+                    <td class="class-cell" data-class="physics-11e" onclick="showClassDetails('physics-11e', '1:00 PM', 'Monday')">
+                        <div class="class-info">
+                            <div class="class-subject">Physics Grade 11</div>
+                            <div class="class-details">Section E • Room 205</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="chemistry-12f" onclick="showClassDetails('chemistry-12f', '1:00 PM', 'Tuesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Chemistry Grade 12</div>
+                            <div class="class-details">Section F • Room 206</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="physics-11e" onclick="showClassDetails('physics-11e', '1:00 PM', 'Wednesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Physics Grade 11</div>
+                            <div class="class-details">Section E • Room 205</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="chemistry-12f" onclick="showClassDetails('chemistry-12f', '1:00 PM', 'Thursday')">
+                        <div class="class-info">
+                            <div class="class-subject">Chemistry Grade 12</div>
+                            <div class="class-details">Section F • Room 206</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="physics-11e" onclick="showClassDetails('physics-11e', '1:00 PM', 'Friday')">
+                        <div class="class-info">
+                            <div class="class-subject">Physics Grade 11</div>
+                            <div class="class-details">Section E • Room 205</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                </tr>
+                <tr data-time="14:00">
+                    <td class="time-cell">2:00 PM</td>
+                    <td class="class-cell" data-class="physics-11e" onclick="showClassDetails('physics-11e', '2:00 PM', 'Monday')">
+                        <div class="class-info">
+                            <div class="class-subject">Physics Grade 11</div>
+                            <div class="class-details">Section E • Room 205</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="chemistry-12f" onclick="showClassDetails('chemistry-12f', '2:00 PM', 'Tuesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Chemistry Grade 12</div>
+                            <div class="class-details">Section F • Room 206</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="physics-11e" onclick="showClassDetails('physics-11e', '2:00 PM', 'Wednesday')">
+                        <div class="class-info">
+                            <div class="class-subject">Physics Grade 11</div>
+                            <div class="class-details">Section E • Room 205</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="chemistry-12f" onclick="showClassDetails('chemistry-12f', '2:00 PM', 'Thursday')">
+                        <div class="class-info">
+                            <div class="class-subject">Chemistry Grade 12</div>
+                            <div class="class-details">Section F • Room 206</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                    <td class="class-cell" data-class="physics-11e" onclick="showClassDetails('physics-11e', '2:00 PM', 'Friday')">
+                        <div class="class-info">
+                            <div class="class-subject">Physics Grade 11</div>
+                            <div class="class-details">Section E • Room 205</div>
+                        </div>
+                        <div class="class-status status-upcoming"></div>
+                    </td>
+                </tr>
+                <tr data-time="15:00">
+                    <td class="time-cell">3:00 PM</td>
+                    <td class="class-cell">
+                        <div class="free-period">Free Period</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="free-period">Free Period</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="free-period">Free Period</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="free-period">Free Period</div>
+                    </td>
+                    <td class="class-cell">
+                        <div class="free-period">Free Period</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Mobile Schedule Cards -->
+    <div class="mobile-schedule" id="mobileSchedule">
+        <div class="day-card">
+            <div class="day-header">
+                <i class="fas fa-calendar-day"></i>
+                Monday
+            </div>
+            <div class="day-schedule">
+                <div class="time-slot">
+                    <div class="slot-time">8:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('math-7a', '8:00 AM', 'Monday')">
+                        <div class="class-subject">Math Grade 7</div>
+                        <div class="class-details">Section A • Room 201</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">9:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('math-7a', '9:00 AM', 'Monday')">
+                        <div class="class-subject">Math Grade 7</div>
+                        <div class="class-details">Section A • Room 201</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">10:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('history-9c', '10:00 AM', 'Monday')">
+                        <div class="class-subject">History Grade 9</div>
+                        <div class="class-details">Section C • Room 203</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">11:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('history-9c', '11:00 AM', 'Monday')">
+                        <div class="class-subject">History Grade 9</div>
+                        <div class="class-details">Section C • Room 203</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">12:00 PM</div>
+                    <div class="slot-class">
+                        <div class="lunch-break">Lunch Break</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">1:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('physics-11e', '1:00 PM', 'Monday')">
+                        <div class="class-subject">Physics Grade 11</div>
+                        <div class="class-details">Section E • Room 205</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">2:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('physics-11e', '2:00 PM', 'Monday')">
+                        <div class="class-subject">Physics Grade 11</div>
+                        <div class="class-details">Section E • Room 205</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">3:00 PM</div>
+                    <div class="slot-class">
+                        <div class="free-period">Free Period</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="day-card">
+            <div class="day-header">
+                <i class="fas fa-calendar-day"></i>
+                Tuesday
+            </div>
+            <div class="day-schedule">
+                <div class="time-slot">
+                    <div class="slot-time">8:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('science-8b', '8:00 AM', 'Tuesday')">
+                        <div class="class-subject">Science Grade 8</div>
+                        <div class="class-details">Section B • Room 202</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">9:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('science-8b', '9:00 AM', 'Tuesday')">
+                        <div class="class-subject">Science Grade 8</div>
+                        <div class="class-details">Section B • Room 202</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">10:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('english-10d', '10:00 AM', 'Tuesday')">
+                        <div class="class-subject">English Grade 10</div>
+                        <div class="class-details">Section D • Room 204</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">11:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('english-10d', '11:00 AM', 'Tuesday')">
+                        <div class="class-subject">English Grade 10</div>
+                        <div class="class-details">Section D • Room 204</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">12:00 PM</div>
+                    <div class="slot-class">
+                        <div class="lunch-break">Lunch Break</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">1:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('chemistry-12f', '1:00 PM', 'Tuesday')">
+                        <div class="class-subject">Chemistry Grade 12</div>
+                        <div class="class-details">Section F • Room 206</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">2:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('chemistry-12f', '2:00 PM', 'Tuesday')">
+                        <div class="class-subject">Chemistry Grade 12</div>
+                        <div class="class-details">Section F • Room 206</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">3:00 PM</div>
+                    <div class="slot-class">
+                        <div class="free-period">Free Period</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="day-card">
+            <div class="day-header">
+                <i class="fas fa-calendar-day"></i>
+                Wednesday
+            </div>
+            <div class="day-schedule">
+                <div class="time-slot">
+                    <div class="slot-time">8:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('math-7a', '8:00 AM', 'Wednesday')">
+                        <div class="class-subject">Math Grade 7</div>
+                        <div class="class-details">Section A • Room 201</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">9:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('math-7a', '9:00 AM', 'Wednesday')">
+                        <div class="class-subject">Math Grade 7</div>
+                        <div class="class-details">Section A • Room 201</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">10:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('history-9c', '10:00 AM', 'Wednesday')">
+                        <div class="class-subject">History Grade 9</div>
+                        <div class="class-details">Section C • Room 203</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">11:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('history-9c', '11:00 AM', 'Wednesday')">
+                        <div class="class-subject">History Grade 9</div>
+                        <div class="class-details">Section C • Room 203</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">12:00 PM</div>
+                    <div class="slot-class">
+                        <div class="lunch-break">Lunch Break</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">1:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('physics-11e', '1:00 PM', 'Wednesday')">
+                        <div class="class-subject">Physics Grade 11</div>
+                        <div class="class-details">Section E • Room 205</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">2:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('physics-11e', '2:00 PM', 'Wednesday')">
+                        <div class="class-subject">Physics Grade 11</div>
+                        <div class="class-details">Section E • Room 205</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">3:00 PM</div>
+                    <div class="slot-class">
+                        <div class="free-period">Free Period</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="day-card">
+            <div class="day-header">
+                <i class="fas fa-calendar-day"></i>
+                Thursday
+            </div>
+            <div class="day-schedule">
+                <div class="time-slot">
+                    <div class="slot-time">8:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('science-8b', '8:00 AM', 'Thursday')">
+                        <div class="class-subject">Science Grade 8</div>
+                        <div class="class-details">Section B • Room 202</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">9:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('science-8b', '9:00 AM', 'Thursday')">
+                        <div class="class-subject">Science Grade 8</div>
+                        <div class="class-details">Section B • Room 202</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">10:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('english-10d', '10:00 AM', 'Thursday')">
+                        <div class="class-subject">English Grade 10</div>
+                        <div class="class-details">Section D • Room 204</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">11:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('english-10d', '11:00 AM', 'Thursday')">
+                        <div class="class-subject">English Grade 10</div>
+                        <div class="class-details">Section D • Room 204</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">12:00 PM</div>
+                    <div class="slot-class">
+                        <div class="lunch-break">Lunch Break</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">1:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('chemistry-12f', '1:00 PM', 'Thursday')">
+                        <div class="class-subject">Chemistry Grade 12</div>
+                        <div class="class-details">Section F • Room 206</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">2:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('chemistry-12f', '2:00 PM', 'Thursday')">
+                        <div class="class-subject">Chemistry Grade 12</div>
+                        <div class="class-details">Section F • Room 206</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">3:00 PM</div>
+                    <div class="slot-class">
+                        <div class="free-period">Free Period</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="day-card">
+            <div class="day-header">
+                <i class="fas fa-calendar-day"></i>
+                Friday
+            </div>
+            <div class="day-schedule">
+                <div class="time-slot">
+                    <div class="slot-time">8:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('math-7a', '8:00 AM', 'Friday')">
+                        <div class="class-subject">Math Grade 7</div>
+                        <div class="class-details">Section A • Room 201</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">9:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('math-7a', '9:00 AM', 'Friday')">
+                        <div class="class-subject">Math Grade 7</div>
+                        <div class="class-details">Section A • Room 201</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">10:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('history-9c', '10:00 AM', 'Friday')">
+                        <div class="class-subject">History Grade 9</div>
+                        <div class="class-details">Section C • Room 203</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">11:00 AM</div>
+                    <div class="slot-class" onclick="showClassDetails('history-9c', '11:00 AM', 'Friday')">
+                        <div class="class-subject">History Grade 9</div>
+                        <div class="class-details">Section C • Room 203</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">12:00 PM</div>
+                    <div class="slot-class">
+                        <div class="lunch-break">Lunch Break</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">1:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('physics-11e', '1:00 PM', 'Friday')">
+                        <div class="class-subject">Physics Grade 11</div>
+                        <div class="class-details">Section E • Room 205</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">2:00 PM</div>
+                    <div class="slot-class" onclick="showClassDetails('physics-11e', '2:00 PM', 'Friday')">
+                        <div class="class-subject">Physics Grade 11</div>
+                        <div class="class-details">Section E • Room 205</div>
+                    </div>
+                </div>
+                <div class="time-slot">
+                    <div class="slot-time">3:00 PM</div>
+                    <div class="slot-class">
+                        <div class="free-period">Free Period</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Class Detail Modal -->
+<div class="modal-overlay" id="classModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Class Details</h2>
+            <button class="modal-close" onclick="closeClassModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="class-detail-info" id="classDetailInfo">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn-primary" onclick="navigateToClass()">
+                <i class="fas fa-external-link-alt"></i>
+                Go to Class
+            </button>
+            <button class="btn-secondary" onclick="viewStudents()">
+                <i class="fas fa-users"></i>
+                View Students
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <span id="toastMessage"></span>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Schedule data
+const scheduleData = {
+    'math-7a': {
+        subject: 'Mathematics',
+        grade: 'Grade 7',
+        section: 'Section A',
+        room: 'Room 201',
+        students: 28,
+        duration: '60 minutes',
+        teacher: 'Ms. Harper',
+        description: 'Algebra and basic geometry concepts'
+    },
+    'science-8b': {
+        subject: 'Science',
+        grade: 'Grade 8',
+        section: 'Section B',
+        room: 'Room 202',
+        students: 25,
+        duration: '60 minutes',
+        teacher: 'Ms. Harper',
+        description: 'Physics and chemistry fundamentals'
+    },
+    'history-9c': {
+        subject: 'History',
+        grade: 'Grade 9',
+        section: 'Section C',
+        room: 'Room 203',
+        students: 30,
+        duration: '60 minutes',
+        teacher: 'Ms. Harper',
+        description: 'World War II and its aftermath'
+    },
+    'english-10d': {
+        subject: 'English',
+        grade: 'Grade 10',
+        section: 'Section D',
+        room: 'Room 204',
+        students: 22,
+        duration: '60 minutes',
+        teacher: 'Ms. Harper',
+        description: 'Literature analysis and creative writing'
+    },
+    'physics-11e': {
+        subject: 'Physics',
+        grade: 'Grade 11',
+        section: 'Section E',
+        room: 'Room 205',
+        students: 18,
+        duration: '60 minutes',
+        teacher: 'Ms. Harper',
+        description: 'Mechanics and thermodynamics'
+    },
+    'chemistry-12f': {
+        subject: 'Chemistry',
+        grade: 'Grade 12',
+        section: 'Section F',
+        room: 'Room 206',
+        students: 20,
+        duration: '60 minutes',
+        teacher: 'Ms. Harper',
+        description: 'Organic chemistry and molecular structures'
+    }
+};
+
+let currentClassData = null;
+
+// Initialize schedule functionality
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSchedule();
+    updateCurrentTimeIndicator();
+    
+    // Update current time indicator every minute
+    setInterval(updateCurrentTimeIndicator, 60000);
+});
+
+function initializeSchedule() {
+    // Week toggle functionality
+    const weekToggle = document.querySelectorAll('input[name="weekToggle"]');
+    weekToggle.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                loadScheduleWeek(this.value);
+            }
+        });
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('classModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeClassModal();
+        }
+    });
+    
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeClassModal();
+        }
+    });
+}
+
+function loadScheduleWeek(week) {
+    const loading = document.getElementById('scheduleLoading');
+    const desktop = document.getElementById('desktopSchedule');
+    const mobile = document.getElementById('mobileSchedule');
+    
+    // Show loading state
+    loading.style.display = 'flex';
+    desktop.style.display = 'none';
+    mobile.style.display = 'none';
+    
+    // Simulate loading delay
+    setTimeout(() => {
+        loading.style.display = 'none';
+        desktop.style.display = 'block';
+        mobile.style.display = 'block';
+        
+        
+        
+        updateCurrentTimeIndicator();
+    }, 1000);
+}
+
+function updateCurrentTimeIndicator() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Remove existing current time indicators
+    document.querySelectorAll('.current-time-row').forEach(row => {
+        row.classList.remove('current-time-row');
+    });
+    
+    // Only highlight during weekdays (Monday-Friday)
+    if (currentDay >= 1 && currentDay <= 5) {
+        // Find the current time slot (8 AM = 8, 9 AM = 9, etc.)
+        if (currentHour >= 8 && currentHour <= 15) {
+            const timeSlot = currentHour.toString().padStart(2, '0') + ':00';
+            const currentRow = document.querySelector(`tr[data-time="${currentHour}:00"]`);
+            if (currentRow) {
+                currentRow.classList.add('current-time-row');
+            }
+        }
+    }
+}
+
+function showClassDetails(classId, time, day) {
+    const classData = scheduleData[classId];
+    if (!classData) return;
+    
+    currentClassData = { ...classData, time, day, classId };
+    
+    const modal = document.getElementById('classModal');
+    const title = document.getElementById('modalTitle');
+    const info = document.getElementById('classDetailInfo');
+    
+    title.textContent = `${classData.subject} - ${classData.grade}`;
+    
+    info.innerHTML = `
+        <div class="detail-item">
+            <span class="detail-label">Time</span>
+            <span class="detail-value">${time} - ${day}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Subject</span>
+            <span class="detail-value">${classData.subject}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Grade & Section</span>
+            <span class="detail-value">${classData.grade} - ${classData.section}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Room</span>
+            <span class="detail-value">${classData.room}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Students</span>
+            <span class="detail-value">${classData.students} students</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Duration</span>
+            <span class="detail-value">${classData.duration}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Teacher</span>
+            <span class="detail-value">${classData.teacher}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Description</span>
+            <span class="detail-value">${classData.description}</span>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+function closeClassModal() {
+    const modal = document.getElementById('classModal');
+    modal.classList.remove('active');
+    currentClassData = null;
+}
+
+function navigateToClass() {
+    if (currentClassData) {
+        showToast(`Navigating to ${currentClassData.subject} class...`, 'success');
+        // Here you would typically navigate to the class page
+        // window.location.href = `/classes/${currentClassData.classId}/`;
+        closeClassModal();
+    }
+}
+
+function viewStudents() {
+    if (currentClassData) {
+        showToast(`Loading student list for ${currentClassData.subject}...`, 'info');
+        // Here you would typically navigate to the students page
+        // window.location.href = `/classes/${currentClassData.classId}/students/`;
+        closeClassModal();
+    }
+}
+
+
+
+// Handle responsive table scrolling
+function handleTableScroll() {
+    const tableContainer = document.querySelector('.schedule-table-container');
+    if (tableContainer.scrollWidth > tableContainer.clientWidth) {
+        tableContainer.style.overflowX = 'auto';
+    }
+}
+
+// Call on window resize
+window.addEventListener('resize', handleTableScroll);
+</script>
+{% endblock %}

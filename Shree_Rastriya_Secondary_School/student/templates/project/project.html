@@ -1,0 +1,1634 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Project Submissions - Student Portal{% endblock %}
+
+{% block header_title %}Project Submissions{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Projects page specific styles */
+    .projects-container {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .page-header h1 {
+        color: var(--text-primary);
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-header p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    /* Search bar */
+    .search-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-secondary);
+        padding: 0 16px 0 48px;
+        font-size: 16px;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(42, 123, 237, 0.1);
+    }
+    
+    .search-input::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+    
+    /* Filter section */
+    .filter-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .filter-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--bg-secondary);
+        border: none;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .filter-button:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    .filter-button.active {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    /* Filter dropdown */
+    .filter-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 100;
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 180px;
+        margin-top: 0.5rem;
+        display: none;
+    }
+    
+    .filter-dropdown.show {
+        display: block;
+    }
+    
+    .filter-option {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .filter-option:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    .filter-option.selected {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    /* Active filters */
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-tag {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--accent-color);
+        color: white;
+        border-radius: 20px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+    }
+    
+    .filter-tag button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* Upload form section */
+    .upload-section {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .upload-section h2 {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(42, 123, 237, 0.1);
+    }
+    
+    .form-input::placeholder, .form-textarea::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    /* File upload styling */
+    .file-upload-container {
+        position: relative;
+    }
+    
+    .file-upload-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+    
+    .file-upload-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        border: 1px dashed var(--border-color);
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        background-color: var(--bg-secondary);
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload-button:hover {
+        border-color: var(--accent-color);
+        background-color: var(--bg-tertiary);
+    }
+    
+    .file-upload-icon {
+        color: var(--accent-color);
+    }
+    
+    .file-name {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        word-break: break-all;
+    }
+    
+    .submit-button {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .submit-button:hover {
+        background-color: var(--accent-hover);
+    }
+    
+    .submit-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    
+    /* Error styling */
+    .error {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+    
+    .error-message {
+        color: #ef4444;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .error-message.show {
+        display: block;
+    }
+    
+    /* Projects table */
+    .projects-section h2 {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .projects-table-container {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        background-color: var(--bg-primary);
+    }
+    
+    .projects-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .projects-table th {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: left;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .projects-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    .projects-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .projects-table tr:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    .project-title {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    /* Actions column */
+    .actions-cell {
+        width: 80px;
+        text-align: center;
+    }
+
+    /* Delete button styling */
+    .delete-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .delete-btn:hover {
+        background-color: #fecaca;
+        color: #b91c1c;
+        transform: scale(1.05);
+    }
+
+    .delete-btn:active {
+        transform: scale(0.95);
+    }
+    
+    /* Status badges with color coding */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-approved {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+    
+    .status-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+    
+    .status-rejected {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+    
+    /* No results message */
+    .no-results {
+        display: none;
+        text-align: center;
+        padding: 3rem 1rem;
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+    }
+    
+    .no-results.show {
+        display: block;
+    }
+    
+    .no-results-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        color: var(--text-muted);
+    }
+    
+    .no-results h3 {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-results p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    /* Mobile responsive cards */
+    .projects-cards {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .project-card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .project-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .project-card-header {
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .project-card h3 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        flex: 1;
+    }
+
+    .project-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        align-items: flex-start;
+    }
+    
+    .project-card-details {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .detail-label {
+        color: var(--text-primary);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .detail-value {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+    }
+
+    /* Delete Confirmation Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal {
+        background-color: var(--bg-primary);
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.show .modal {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .modal-icon {
+        width: 48px;
+        height: 48px;
+        background-color: #fee2e2;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dc2626;
+        flex-shrink: 0;
+    }
+
+    .modal-title {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .modal-body {
+        margin-bottom: 2rem;
+    }
+
+    .modal-text {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    .project-info {
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 4px solid var(--accent-color);
+    }
+
+    .project-info-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .project-info-subject {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .modal-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .modal-btn-cancel {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .modal-btn-cancel:hover {
+        background-color: var(--bg-tertiary);
+    }
+
+    .modal-btn-delete {
+        background-color: #dc2626;
+        color: white;
+    }
+
+    .modal-btn-delete:hover {
+        background-color: #b91c1c;
+    }
+
+    .modal-btn-delete:disabled {
+        background-color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    /* Hidden delete form */
+    .hidden-delete-form {
+        display: none;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 767px) {
+        .projects-container {
+            padding: 1rem;
+        }
+        
+        .upload-section {
+            padding: 1rem;
+        }
+        
+        .projects-table-container {
+            display: none;
+        }
+        
+        .projects-cards {
+            display: flex;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .modal {
+            padding: 1.5rem;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+
+        .modal-btn {
+            width: 100%;
+        }
+    }
+    
+    @media (min-width: 768px) {
+        .projects-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .upload-section {
+            padding: 2rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+    }
+    
+    /* Dark mode adjustments */
+    [data-theme="dark"] .upload-section {
+        background-color: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .projects-table th {
+        background-color: var(--bg-tertiary);
+    }
+    
+    [data-theme="dark"] .projects-table tr:hover {
+        background-color: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .project-card {
+        background-color: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .filter-dropdown {
+        background-color: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .status-approved {
+        background-color: #14532d;
+        color: #bbf7d0;
+        border: 1px solid #166534;
+    }
+    
+    [data-theme="dark"] .status-pending {
+        background-color: #92400e;
+        color: #fde68a;
+        border: 1px solid #d97706;
+    }
+    
+    [data-theme="dark"] .status-rejected {
+        background-color: #991b1b;
+        color: #fecaca;
+        border: 1px solid #dc2626;
+    }
+    
+    [data-theme="dark"] .file-upload-button {
+        background-color: var(--bg-tertiary);
+    }
+
+    [data-theme="dark"] .delete-btn {
+        background-color: #7f1d1d;
+        color: #fecaca;
+    }
+
+    [data-theme="dark"] .delete-btn:hover {
+        background-color: #991b1b;
+        color: #fee2e2;
+    }
+
+    [data-theme="dark"] .modal {
+        background-color: var(--bg-secondary);
+    }
+
+    [data-theme="dark"] .modal-icon {
+        background-color: #7f1d1d;
+        color: #fecaca;
+    }
+
+    [data-theme="dark"] .project-info {
+        background-color: var(--bg-tertiary);
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 400px;
+        pointer-events: none;
+    }
+
+    .toast {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #e5e7eb;
+        min-width: 320px;
+        max-width: 400px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: auto;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .toast.hide {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    .toast-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        position: relative;
+    }
+
+    .toast-icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        margin-top: 2px;
+    }
+
+    .toast-message {
+        flex: 1;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .toast-close {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 6px;
+        color: #9ca3af;
+        transition: all 0.2s ease;
+        margin-top: -2px;
+    }
+
+    .toast-close:hover {
+        background-color: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .toast-progress-bar {
+        height: 100%;
+        background-color: currentColor;
+        width: 100%;
+        transform-origin: left;
+        animation: toastProgress 5s linear forwards;
+    }
+
+    @keyframes toastProgress {
+        from {
+            transform: scaleX(1);
+        }
+        to {
+            transform: scaleX(0);
+        }
+    }
+
+    /* Toast variants */
+    .toast-success {
+        border-left-color: #10b981;
+    }
+
+    .toast-success .toast-icon {
+        color: #10b981;
+    }
+
+    .toast-success .toast-progress-bar {
+        background-color: #10b981;
+    }
+
+    .toast-error {
+        border-left-color: #ef4444;
+    }
+
+    .toast-error .toast-icon {
+        color: #ef4444;
+    }
+
+    .toast-error .toast-progress-bar {
+        background-color: #ef4444;
+    }
+
+    .toast-warning {
+        border-left-color: #f59e0b;
+    }
+
+    .toast-warning .toast-icon {
+        color: #f59e0b;
+    }
+
+    .toast-warning .toast-progress-bar {
+        background-color: #f59e0b;
+    }
+
+    .toast-info {
+        border-left-color: #3b82f6;
+    }
+
+    .toast-info .toast-icon {
+        color: #3b82f6;
+    }
+
+    .toast-info .toast-progress-bar {
+        background-color: #3b82f6;
+    }
+
+    /* Dark mode toast styles */
+    [data-theme="dark"] .toast {
+        background-color: var(--bg-secondary);
+        border-left-color: #4b5563;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] .toast-message {
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .toast-close {
+        color: var(--text-muted);
+    }
+
+    [data-theme="dark"] .toast-close:hover {
+        background-color: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .toast-progress {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 480px) {
+        .toast-container {
+            right: 12px;
+            left: 12px;
+            top: 12px;
+            max-width: none;
+        }
+        
+        .toast {
+            min-width: auto;
+            max-width: none;
+        }
+        
+        .toast-content {
+            padding: 14px;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="projects-container">
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast toast-{{ message.tags|default:'info' }} show" data-toast-id="{{ forloop.counter }}">
+                <div class="toast-content">
+                    <div class="toast-icon">
+                        {% if message.tags == 'success' %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
+                            </svg>
+                        {% elif message.tags == 'error' %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
+                            </svg>
+                        {% elif message.tags == 'warning' %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"></path>
+                            </svg>
+                        {% else %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
+                            </svg>
+                        {% endif %}
+                    </div>
+                    <div class="toast-message">{{ message }}</div>
+                    <button class="toast-close" onclick="closeToast({{ forloop.counter }})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="toast-progress">
+                    <div class="toast-progress-bar"></div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path>
+                    </svg>
+                </div>
+                <h3 class="modal-title">Delete Project</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text">Are you sure you want to delete this project? This action cannot be undone.</p>
+                <div class="project-info" id="projectInfo">
+                    <div class="project-info-title" id="projectInfoTitle">Project Title</div>
+                    <div class="project-info-subject" id="projectInfoSubject">Subject Name</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="modal-btn modal-btn-delete" id="confirmDeleteBtn" onclick="confirmDelete()">Delete Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Delete Form -->
+    <form method="POST" class="hidden-delete-form" id="hiddenDeleteForm" action="{% url "student:delete_project" %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="project_id" id="deleteProjectId">
+    </form>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Project Submissions</h1>
+        <p>Manage your project submissions and track their status.</p>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="search-container">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+        </svg>
+        <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search projects..."
+            id="projectSearch"
+        />
+    </div>
+    
+    <!-- Filter Section -->
+<div class="filter-section">
+    <div class="filter-buttons">
+
+        <!-- Subject Filter -->
+        <div class="filter-button" id="subjectFilter">
+            Subject
+            <i class="fa-solid fa-angle-down"></i> <!-- Font Awesome icon -->
+            <div class="filter-dropdown" id="subjectDropdown">
+                <div class="filter-option" data-value="">All Subjects</div>
+                {% for subject in student.student_class.subjects.all %}
+                <div class="filter-option" data-value="{{subject.name|lower}}">{{subject.name}}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="filter-button" id="statusFilter">
+            Status
+            <i class="fa-solid fa-angle-down"></i> <!-- Font Awesome icon -->
+            <div class="filter-dropdown" id="statusDropdown">
+                <div class="filter-option" data-value="">All Statuses</div>
+                <div class="filter-option" data-value="approved">Approved</div>
+                <div class="filter-option" data-value="pending">Pending</div>
+                <div class="filter-option" data-value="rejected">Rejected</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+    
+    <!-- Active Filters -->
+    <div class="active-filters" id="activeFilters"></div>
+    
+    <!-- Upload New Project Section -->
+    <div class="upload-section">
+        <h2>Upload New Project</h2>
+        <form id="projectForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="projectTitle">Project Title *</label>
+                    <input type="text" id="projectTitle" name="title" class="form-input" placeholder="Enter project title" required>
+                    <div class="error-message" id="titleError">Please enter a project title</div>
+                </div>
+                <div class="form-group">
+                    <label for="projectSubject">Subject *</label>
+                    <select id="projectSubject" name="subject" class="form-select" required>
+                        <option value="">Select subject</option>
+                        {% for subject in student.student_class.subjects.all %}  
+                        <option value="{{subject.id}}">{{subject.name}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="error-message" id="subjectError">Please select a subject</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="projectFile">PDF File Upload *</label>
+                <div class="file-upload-container">
+                    <input type="file" id="projectFile" name="file" class="file-upload-input" accept=".pdf" required>
+                    <div class="file-upload-button">
+                        <svg class="file-upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-42.34-77.66a8,8,0,0,1-11.32,11.32L136,139.31V184a8,8,0,0,1-16,0V139.31l-10.34,10.35a8,8,0,0,1-11.32-11.32l24-24a8,8,0,0,1,11.32,0Z"></path>
+                        </svg>
+                        <span>Choose a PDF file or drag it here</span>
+                    </div>
+                </div>
+                <div id="fileName" class="file-name"></div>
+                <div class="error-message" id="fileError">Please select a PDF file</div>
+            </div>
+            <div class="form-group">
+                <label for="projectDescription">Description (optional)</label>
+                <textarea id="projectDescription" name="description" class="form-textarea" placeholder="Add any notes or description"></textarea>
+            </div>
+            <button type="submit" class="submit-button">Submit Project</button>
+        </form>
+    </div>
+    
+    <!-- Submitted Projects Section -->
+    <div class="projects-section">
+        <h2>Submitted Projects</h2>
+        
+        {% if not projects %}
+            <div class="no-results show">
+                <svg class="no-results-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM152,41.37,188.63,78H152ZM200,216H56V40h80V88a8,8,0,0,0,8,8h56V216Z"></path>
+                </svg>
+                <h3>Looks like you have not uploaded any projects yet</h3>
+                <p>Upload now to see their stats</p>
+            </div>
+        {% else %}
+        
+            <!-- No Results Message -->
+            <div class="no-results" id="noResults">
+                <svg class="no-results-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM152,41.37,188.63,78H152ZM200,216H56V40h80V88a8,8,0,0,0,8,8h56V216Zm-42.34-101.66a8,8,0,0,1,0,11.32l-32,32a8,8,0,0,1-11.32,0l-32-32a8,8,0,0,1,11.32-11.32L112,132.69V104a8,8,0,0,1,16,0v28.69l18.34-18.35A8,8,0,0,1,157.66,114.34Z"></path>
+                </svg>
+                <h3>No Projects Found</h3>
+                <p>No projects match your search criteria. Try adjusting your filters or search terms.</p>
+            </div>
+            
+            <!-- Desktop Table View -->
+            <div class="projects-table-container" id="projectsTable">
+                <table class="projects-table">
+                    <thead>
+                        <tr>
+                            <th>Project Title</th>
+                            <th>Submission Date</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th class="actions-cell">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in projects %} 
+                        <tr data-title="{{project.title}}" data-subject="{{project.subject|lower}}" data-status="{{project.status|lower}}" data-project-id="{{project.id}}">
+                            <td class="project-title">{{project.title}}</td>
+                            <td>{{project.uploaded_at}}</td>
+                            <td>{{project.subject}}</td>
+                            <td><span class="status-badge status-{{project.status|lower}}">{{project.status}}</span></td>
+                            <td class="actions-cell">
+                                <button class="delete-btn" title="Delete Project" onclick="showDeleteModal('{{project.id}}', '{{project.title}}', '{{project.subject}}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                                        <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Mobile Card View -->
+            <div class="projects-cards" id="projectsCards">
+                {% for project in projects %} 
+                <div class="project-card" data-title="{{project.title}}" data-subject="{{project.subject}}" data-status="{{project.status|lower}}" data-project-id="{{project.id}}">
+                    <div class="project-card-header">
+                        <h3>{{project.title}}</h3>
+                        <div class="project-card-actions">
+                            <span class="status-badge status-{{project.status|lower}}">{{project.status}}</span>
+                            <button class="delete-btn" title="Delete Project" onclick="showDeleteModal('{{project.id}}', '{{project.title}}', '{{project.subject}}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                                    <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="project-card-details">
+                        <div class="detail-label">Subject:</div>
+                        <div class="detail-value">{{project.subject}}</div>
+                        
+                        <div class="detail-label">Submitted:</div>
+                        <div class="detail-value">{{project.uploaded_at}}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Global variables
+    let activeFilters = {
+        subject: '',
+        status: ''
+    };
+    
+    let projectToDelete = null;
+    
+    // Elements
+    const searchInput = document.getElementById('projectSearch');
+    const tableRows = document.querySelectorAll('.projects-table tbody tr');
+    const projectCards = document.querySelectorAll('.project-card');
+    const noResults = document.getElementById('noResults');
+    const projectsTable = document.getElementById('projectsTable');
+    const projectsCards = document.getElementById('projectsCards');
+    const activeFiltersDiv = document.getElementById('activeFilters');
+    
+    // Filter elements
+    const subjectFilter = document.getElementById('subjectFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const subjectDropdown = document.getElementById('subjectDropdown');
+    const statusDropdown = document.getElementById('statusDropdown');
+    
+    // File upload elements
+    const fileInput = document.getElementById('projectFile');
+    const fileName = document.getElementById('fileName');
+    
+    // Form validation elements
+    const projectForm = document.getElementById('projectForm');
+    const titleInput = document.getElementById('projectTitle');
+    const subjectInput = document.getElementById('projectSubject');
+    const submitButton = document.querySelector('.submit-button');
+    
+    // Error message elements
+    const titleError = document.getElementById('titleError');
+    const subjectError = document.getElementById('subjectError');
+    const fileError = document.getElementById('fileError');
+
+    // Modal elements
+    const deleteModal = document.getElementById('deleteModal');
+    const projectInfo = document.getElementById('projectInfo');
+    const projectInfoTitle = document.getElementById('projectInfoTitle');
+    const projectInfoSubject = document.getElementById('projectInfoSubject');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const hiddenDeleteForm = document.getElementById('hiddenDeleteForm');
+    const deleteProjectId = document.getElementById('deleteProjectId');
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        applyFilters();
+    });
+    
+    // Filter dropdown functionality
+    subjectFilter.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleDropdown(subjectDropdown);
+        closeDropdown(statusDropdown);
+    });
+    
+    statusFilter.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleDropdown(statusDropdown);
+        closeDropdown(subjectDropdown);
+    });
+    
+    // Filter option selection
+    subjectDropdown.addEventListener('click', function(e) {
+        if (e.target.classList.contains('filter-option')) {
+            selectFilterOption('subject', e.target);
+            closeDropdown(subjectDropdown);
+        }
+    });
+    
+    statusDropdown.addEventListener('click', function(e) {
+        if (e.target.classList.contains('filter-option')) {
+            selectFilterOption('status', e.target);
+            closeDropdown(statusDropdown);
+        }
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function() {
+        closeDropdown(subjectDropdown);
+        closeDropdown(statusDropdown);
+    });
+    
+    // File upload functionality
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            const fileType = file.type;
+            const fileName = file.name;
+            
+            // Check if file is PDF
+            if (fileType !== 'application/pdf') {
+                showError(fileInput, fileError, 'Please select a PDF file only');
+                this.value = ''; // Clear the input
+                document.getElementById('fileName').textContent = '';
+                return;
+            }
+            
+            // File is valid PDF
+            hideError(fileInput, fileError);
+            document.getElementById('fileName').textContent = fileName;
+        } else {
+            document.getElementById('fileName').textContent = '';
+        }
+    });
+    
+    // Form validation
+    titleInput.addEventListener('blur', function() {
+        validateTitle();
+    });
+    
+    titleInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            hideError(this, titleError);
+        }
+    });
+    
+    subjectInput.addEventListener('change', function() {
+        validateSubject();
+    });
+    
+    // Form submission validation
+    projectForm.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate title
+        if (!validateTitle()) {
+            isValid = false;
+        }
+        
+        // Validate subject
+        if (!validateSubject()) {
+            isValid = false;
+        }
+        
+        // Validate file
+        if (!validateFile()) {
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state
+        submitButton.textContent = 'Uploading...';
+        submitButton.disabled = true;
+        
+        // Form will submit naturally to Django
+    });
+    
+    // Validation functions
+    function validateTitle() {
+        const title = titleInput.value.trim();
+        if (!title) {
+            showError(titleInput, titleError, 'Please enter a project title');
+            return false;
+        }
+        if (title.length < 3) {
+            showError(titleInput, titleError, 'Title must be at least 3 characters long');
+            return false;
+        }
+        hideError(titleInput, titleError);
+        return true;
+    }
+    
+    function validateSubject() {
+        const subject = subjectInput.value;
+        if (!subject) {
+            showError(subjectInput, subjectError, 'Please select a subject');
+            return false;
+        }
+        hideError(subjectInput, subjectError);
+        return true;
+    }
+    
+    function validateFile() {
+        const file = fileInput.files[0];
+        if (!file) {
+            showError(fileInput, fileError, 'Please select a PDF file');
+            return false;
+        }
+        if (file.type !== 'application/pdf') {
+            showError(fileInput, fileError, 'Please select a PDF file only');
+            return false;
+        }
+        hideError(fileInput, fileError);
+        return true;
+    }
+    
+    function showError(input, errorElement, message) {
+        input.classList.add('error');
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+    }
+    
+    function hideError(input, errorElement) {
+        input.classList.remove('error');
+        errorElement.classList.remove('show');
+    }
+    
+    // Filter functions
+    function toggleDropdown(dropdown) {
+        dropdown.classList.toggle('show');
+    }
+    
+    function closeDropdown(dropdown) {
+        dropdown.classList.remove('show');
+    }
+    
+    function selectFilterOption(filterType, option) {
+        const value = option.getAttribute('data-value');
+        const text = option.textContent;
+        
+        // Update active filters
+        activeFilters[filterType] = value;
+        
+        // Update UI
+        updateFilterButton(filterType, text, value);
+        updateActiveFilters();
+        applyFilters();
+    }
+    
+    function updateFilterButton(filterType, text, value) {
+        const button = filterType === 'subject' ? subjectFilter : statusFilter;
+        
+        if (value) {
+            button.classList.add('active');
+            button.firstChild.textContent = text;
+        } else {
+            button.classList.remove('active');
+            button.firstChild.textContent = filterType === 'subject' ? 'Subject' : 'Status';
+        }
+    }
+    
+    function updateActiveFilters() {
+        activeFiltersDiv.innerHTML = '';
+        
+        Object.keys(activeFilters).forEach(filterType => {
+            const value = activeFilters[filterType];
+            if (value) {
+                const tag = document.createElement('div');
+                tag.className = 'filter-tag';
+                
+                const label = document.createElement('span');
+                label.textContent = `${filterType === 'subject' ? 'Subject' : 'Status'}: ${value}`;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', function() {
+                    removeFilter(filterType);
+                });
+                
+                tag.appendChild(label);
+                tag.appendChild(removeBtn);
+                activeFiltersDiv.appendChild(tag);
+            }
+        });
+    }
+    
+    function removeFilter(filterType) {
+        activeFilters[filterType] = '';
+        updateFilterButton(filterType, '', '');
+        updateActiveFilters();
+        applyFilters();
+    }
+    
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleCount = 0;
+        
+        // Filter table rows (desktop)
+        tableRows.forEach(row => {
+            if (matchesFilters(row, searchTerm)) {
+                row.style.display = 'table-row';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Filter cards (mobile)
+        projectCards.forEach(card => {
+            if (matchesFilters(card, searchTerm)) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        if (visibleCount === 0) {
+            noResults.classList.add('show');
+            projectsTable.style.display = 'none';
+            projectsCards.style.display = 'none';
+        } else {
+            noResults.classList.remove('show');
+            checkScreenSize(); // Restore proper display based on screen size
+        }
+    }
+    
+    function matchesFilters(element, searchTerm) {
+        const title = element.getAttribute('data-title').toLowerCase();
+        const subject = element.getAttribute('data-subject');
+        const status = element.getAttribute('data-status');
+        
+        // Check search term
+        const matchesSearch = !searchTerm || title.includes(searchTerm) || subject.toLowerCase().includes(searchTerm);
+        
+        // Check subject filter
+        const matchesSubject = !activeFilters.subject || subject === activeFilters.subject;
+        
+        // Check status filter
+        const matchesStatus = !activeFilters.status || status === activeFilters.status;
+        
+        return matchesSearch && matchesSubject && matchesStatus;
+    }
+    
+    // Responsive functionality
+    function checkScreenSize() {
+        if (window.innerWidth < 768) {
+            projectsTable.style.display = 'none';
+            projectsCards.style.display = 'flex';
+        } else {
+            projectsTable.style.display = 'block';
+            projectsCards.style.display = 'none';
+        }
+    }
+    
+    // Run on load and resize
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    // Delete Modal Functions
+    window.showDeleteModal = function(projectId, projectTitle, projectSubject) {
+        projectToDelete = projectId;
+        projectInfoTitle.textContent = projectTitle;
+        projectInfoSubject.textContent = projectSubject;
+        deleteModal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    };
+
+    window.closeDeleteModal = function() {
+        deleteModal.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scrolling
+        projectToDelete = null;
+    };
+
+    window.confirmDelete = function() {
+        if (!projectToDelete) return;
+        
+        // Set the project ID in the hidden form
+        deleteProjectId.value = projectToDelete;
+        
+        // Submit the form
+        hiddenDeleteForm.submit();
+    };
+
+    // Close modal when clicking outside
+    deleteModal.addEventListener('click', function(e) {
+        if (e.target === deleteModal) {
+            closeDeleteModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && deleteModal.classList.contains('show')) {
+            closeDeleteModal();
+        }
+    });
+
+    // Toast notification functions
+    function closeToast(toastId) {
+        const toast = document.querySelector(`[data-toast-id="${toastId}"]`);
+        if (toast) {
+            toast.classList.add('hide');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }
+    }
+
+    // Auto-hide existing toasts after 5 seconds
+    document.querySelectorAll('.toast.show').forEach((toast, index) => {
+        setTimeout(() => {
+            const toastId = toast.getAttribute('data-toast-id');
+            if (toastId) {
+                closeToast(toastId);
+            }
+        }, 5000 + (index * 500)); // Stagger the auto-hide timing
+    });
+});
+</script>
+{% endblock %}

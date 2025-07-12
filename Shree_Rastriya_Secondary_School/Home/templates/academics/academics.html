@@ -1,0 +1,1567 @@
+{% extends "Base/base.html" %}
+{% load static %}
+
+{% block title %}Shree Rastriya Mavi School - Academics{% endblock title %}
+
+{% block links %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static "home/css/academics/style.css" %}">
+    
+    <style>
+        /* Essential styles to ensure content visibility */
+        :root {
+            --primary-blue: #2563EB;
+            --secondary-blue: #3B82F6;
+            --dark-blue: #1E40AF;
+            --light-blue: #EFF6FF;
+            --accent-blue: #DBEAFE;
+
+            --primary-green: #059669;
+            --secondary-green: #10B981;
+            --dark-green: #047857;
+            --light-green: #ECFDF5;
+
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --text-white: #FFFFFF;
+            --bg-white: #FFFFFF;
+            --bg-light: #F9FAFB;
+            --bg-dark: #111827;
+
+            --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary-blue) 0%, var(--primary-blue) 100%);
+            --gradient-text: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 0;
+            padding-top: 60px;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape-1 {
+            width: 100px;
+            height: 100px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .shape-3 {
+            width: 80px;
+            height: 80px;
+            bottom: 30%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .shape-4 {
+            width: 120px;
+            height: 120px;
+            top: 10%;
+            right: 30%;
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hero-text {
+            color: white;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .title-line {
+            display: block;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-blue);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-outline {
+            background: blue;
+            color: var(--primary-blue);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-outline:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);              
+        }
+
+        .hero-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        .scroll-arrow {
+            width: 50px;
+            height: 50px;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 6rem 0;
+            position: relative;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        .section:nth-child(even) {
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Academic Levels */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .level-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .level-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .level-image {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .level-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .level-card:hover .level-image img {
+            transform: scale(1.1);
+        }
+
+        .level-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .level-card:hover .level-overlay {
+            opacity: 0.9;
+        }
+
+        .level-icon {
+            color: white;
+            font-size: 3rem;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .level-card:hover .level-icon {
+            transform: scale(1);
+        }
+
+        .level-content {
+            padding: 2rem;
+        }
+
+        .level-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .level-grade {
+            color: var(--primary-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .level-description {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .level-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .level-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Curriculum Section */
+        .curriculum-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .curriculum-card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .curriculum-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: var(--primary-blue);
+        }
+
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .curriculum-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .curriculum-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .curriculum-card p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Faculty Section - UPDATED FOR HORIZONTAL SLIDING */
+        .faculty-section {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .faculty-container {
+            position: relative;
+        }
+
+        .faculty-slider {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 1rem 0 2rem 0;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .faculty-slider::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .faculty-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex: 0 0 320px; /* Fixed width for consistent sizing */
+            min-height: 500px;
+        }
+
+        .faculty-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .faculty-image {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .faculty-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .faculty-card:hover .faculty-image img {
+            transform: scale(1.1);
+        }
+
+        .faculty-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .faculty-card:hover .faculty-overlay {
+            opacity: 0.9;
+        }
+
+        .faculty-social {
+            display: flex;
+            gap: 1rem;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .faculty-card:hover .faculty-social {
+            transform: translateY(0);
+        }
+
+        .faculty-social a {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-blue);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .faculty-social a:hover {
+            transform: scale(1.1);
+        }
+
+        .faculty-info {
+            padding: 2rem;
+        }
+
+        .faculty-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .faculty-role {
+            color: var(--primary-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .faculty-description {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Navigation Arrows */
+        .faculty-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .faculty-nav:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .faculty-nav.prev {
+            left: -30px;
+        }
+
+        .faculty-nav.next {
+            right: -30px;
+        }
+
+        /* Scroll Indicators */
+        .faculty-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: var(--primary-blue);
+            transform: scale(1.2);
+        }
+
+        /* Touch/Mobile Optimizations */
+        @media (max-width: 768px) {
+            .faculty-card {
+                flex: 0 0 280px;
+            }
+
+            .faculty-nav {
+                display: none; /* Hide arrows on mobile, use touch scroll */
+            }
+
+            .faculty-slider {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* Resources Section */
+        .resources-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .resource-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .resource-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-blue);
+        }
+
+        .resource-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--light-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .resource-content {
+            flex: 1;
+        }
+
+        .resource-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .resource-content p {
+            color: var(--text-light);
+        }
+
+        .download-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--gradient-primary);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-content h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
+            color:blue;
+        }
+
+        .cta-content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            color: blue;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-section .btn-primary {
+            background: white;
+            color: var(--primary-blue);
+        }
+
+        .cta-section .btn-outline {
+            border-color: white;
+            color: white;
+        }
+
+        .cta-section .btn-outline:hover {
+            background: white;
+            color: var(--primary-blue);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-dark);
+            color: white;
+            padding: 3rem 0;
+        }
+
+        .footer-content {
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary-blue);
+        }
+
+        .footer-text {
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                text-align: center;
+            }
+
+            .hero-stats {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .levels-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+
+            .curriculum-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .section {
+                padding: 4rem 0;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .btn {
+                min-width: 140px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .stat-item {
+                padding: 1.5rem 1rem;
+            }
+
+            .levels-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .curriculum-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .resource-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-description {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .section-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .curriculum-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .card-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+{% endblock links %}
+
+{% block content %}
+<!-- Hero Section -->
+<section id="home" class="hero-section">
+    <div class="hero-background">
+        <div class="hero-overlay"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
+    </div>
+    
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">
+                <span class="title-line">Excellence in</span>
+                <span class="title-line gradient-text">Academic Education</span>
+            </h1>
+            <p class="hero-description">
+                Nurturing minds, shaping futures. Our comprehensive academic program 
+                prepares students for success in an ever-evolving world.
+            </p>
+           
+        </div>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                {% if achivement.student < 100  %}
+                    
+                 <div class="stat-number">{{ achivement.student|default:"N/A" }}</div>
+                 {% else %}
+                  <div class="stat-number">{{ achivement.student|default:"N/A" }}+</div>
+                <div class="stat-label">Students</div>
+                {% endif %}
+            </div>
+
+            <div class="stat-item">
+                {% if achivement.Faculty < 1 %}    
+                  <div class="stat-number">{{achivement.Faculty|default:"N/A"}}</div>
+                  {% else %}
+                    <div class="stat-number">{{achivement.Faculty|default:"N/A"}}+</div>
+                {% endif %}
+                <div class="stat-label">Faculty</div>
+            </div>
+
+            <div class="stat-item">
+                {% if achivement.experience < 1 %} 
+                    <div class="stat-number">{{achivement.experience}}</div>
+                {% else %}
+                    <div class="stat-number">{{achivement.experience}}+</div>
+                {% endif %}
+                <div class="stat-label">Years</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scroll-indicator">
+        <div class="scroll-arrow">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Academic Levels Section -->
+<section id="academics" class="section academic-levels">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Academic Levels</h2>
+            <p class="section-subtitle">
+                Comprehensive education programs designed for every stage of learning
+            </p>
+        </div>
+        
+        <div class="levels-grid">
+            <div class="level-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="level-image">
+                    <img src="{{grade.grade_low.url}}" alt="Lower School">
+                    <div class="level-overlay">
+                        <div class="level-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="level-content">
+                    <h3>Lower School</h3>
+                    <p class="level-grade">Grades K-5</p>
+                    <p class="level-description">
+                        {{grade.low_des}}
+                    </p>
+                  
+                </div>
+            </div>
+            
+            <div class="level-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="level-image">
+                    <img src="{{grade.grade_mid.url}}" alt="Middle School">
+                    <div class="level-overlay">
+                        <div class="level-icon">
+                            <i class="fas fa-tree"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="level-content">
+                    <h3>Middle School</h3>
+                    <p class="level-grade">Grades 6-8</p>
+                    <p class="level-description">
+                        {{grade.mid_des}}.
+                    </p>
+                 
+                </div>
+            </div>
+            
+            <div class="level-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="level-image">
+                    <img src="{{grade.grade_high.url}}" alt="Upper School">
+                    <div class="level-overlay">
+                        <div class="level-icon">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="level-content">
+                    <h3>Upper School</h3>
+                    <p class="level-grade">Grades 9-12</p>
+                    <p class="level-description">
+                        {{grade.high_des}}
+                    </p>
+               
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Curriculum Section -->
+<section id="curriculum" class="section curriculum-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Our Curriculum</h2>
+            <p class="section-subtitle">
+                Comprehensive subjects designed to foster well-rounded development
+            </p>
+        </div>
+        
+        <div class="curriculum-grid">
+    <div class="curriculum-card" data-aos="zoom-in" data-aos-delay="150">
+    <div class="card-icon">
+        <i class="fas fa-flask"></i>
+    </div>
+    <h3>Science</h3>
+    <p>Exploring the natural world through inquiry</p>
+</div>
+
+<div class="curriculum-card" data-aos="zoom-in" data-aos-delay="200">
+    <div class="card-icon">
+        <i class="fas fa-calculator"></i>
+    </div>
+    <h3>Mathematics</h3>
+    <p>Building logical thinking and problem-solving</p>
+</div>
+
+<div class="curriculum-card" data-aos="zoom-in" data-aos-delay="250">
+    <div class="card-icon">
+        <i class="fas fa-globe"></i>
+    </div>
+    <h3>Social Studies</h3>
+    <p>Understanding society and global perspectives</p>
+</div>
+
+<div class="curriculum-card" data-aos="zoom-in" data-aos-delay="300">
+    <div class="card-icon">
+        <i class="fas fa-language"></i>
+    </div>
+    <h3>Nepali</h3>
+    <p>Promoting language skills and cultural identity</p>
+</div>
+
+<div class="curriculum-card" data-aos="zoom-in" data-aos-delay="350">
+    <div class="card-icon">
+        <i class="fas fa-book-open"></i>
+    </div>
+    <h3>English</h3>
+    <p>Enhancing communication and comprehension skills</p>
+</div>
+
+<div class="curriculum-card" data-aos="zoom-in" data-aos-delay="400">
+    <div class="card-icon">
+        <i class="fas fa-desktop"></i>
+    </div>
+    <h3>Computer</h3>
+    <p>Empowering digital literacy and coding basics</p>
+</div>
+
+<div class="curriculum-card" data-aos="zoom-in" data-aos-delay="450">
+    <div class="card-icon">
+        <i class="fas fa-square-root-alt"></i>
+    </div>
+    <h3>Optional Mathematics</h3>
+    <p>Challenging advanced learners in mathematical thinking</p>
+</div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Faculty Section - UPDATED WITH HORIZONTAL SLIDING -->
+<section id="faculty" class="section faculty-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Meet Our Faculty</h2>
+            <p class="section-subtitle">
+                Dedicated educators committed to student success
+            </p>
+        </div>
+        
+        <div class="faculty-container">
+            <!-- Navigation Arrows -->
+            <button class="faculty-nav prev" id="facultyPrev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="faculty-nav next" id="facultyNext">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Faculty Slider -->
+            <div class="faculty-slider" id="facultySlider">
+                {% for faculty in facultys %} 
+                <div class="faculty-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="faculty-image">
+                        <img src="{{faculty.teacher_image.url}}" alt="{{faculty.teacher_name}}">
+                        <div class="faculty-overlay">
+                            <div class="faculty-social">
+                                <a href="{{faculty.teacher_social_link}}" target="_blank">
+                                    <i class="fab fa-facebook"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faculty-info">
+                        <h3>{{faculty.teacher_name}}</h3>
+                        <p class="faculty-role">{{faculty.teacher_faculty}}</p>
+                        <p class="faculty-description">{{faculty.teacher_description}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Scroll Indicators -->
+            <div class="faculty-indicators" id="facultyIndicators">
+                <!-- Indicators will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Resources Section -->
+<section id="resources" class="section resources-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Academic Resources</h2>
+            <p class="section-subtitle">
+                Essential materials and tools for academic success
+            </p>
+        </div>
+        
+        <div class="resources-grid">
+            <div class="resource-item" data-aos="slide-right" data-aos-delay="100">
+                <div class="resource-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="resource-content">
+                    <h3>Course Catalogs</h3>
+                    <p>Comprehensive course descriptions and requirements</p>
+                </div>
+                <div class="resource-action">
+                    <a href="{{resource.Course_Catalogs.url}}" download>
+                    <button class="download-btn">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </a>
+                </div>
+            </div>
+            
+            <div class="resource-item" data-aos="slide-right" data-aos-delay="200">
+                <div class="resource-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="resource-content">
+                    <h3>Academic Policies</h3>
+                    <p>Guidelines and procedures for academic success</p>
+                </div>
+                <div class="resource-action">
+                <a href="{{resource.Academic_Policies.url}}" download>
+                    <button class="download-btn">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </a>
+                </div>
+            </div>
+            
+            <div class="resource-item" data-aos="slide-right" data-aos-delay="300">
+                <div class="resource-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="resource-content">
+                    <h3>Study Guides</h3>
+                    <p>Helpful materials for exam preparation</p>
+                </div>
+                <div class="resource-action">
+                    <a href="{{resource.Study_Guides.url}}" download>
+                    <button class="download-btn"> 
+                        <i class="fas fa-download"></i>
+                    </button>
+                   </a>
+                </div>
+            </div>
+            
+            <div class="resource-item" data-aos="slide-right" data-aos-delay="400">
+                <div class="resource-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="resource-content">
+                    <h3>Academic Calendar</h3>
+                    <p>Important dates and academic schedule</p>
+                </div>
+                <div class="resource-action">
+                    <a href="{{resource.Academic_Calendar.url}}" download>
+                    <button class="download-btn">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-content" data-aos="fade-up">
+            <h2>Ready to Begin Your Academic Journey?</h2>
+            <p>Join our community of learners and discover your potential at Shree Rastriya Mavi School.</p>
+            <div class="cta-buttons">
+                <a href="{% url "home:admission" %}"> 
+                <button class="btn btn-primary btn-large">Apply Now</button>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-links">
+                {% comment %} <a href="#">Privacy Policy</a> {% endcomment %}
+                {% comment %} <a href="#">Terms of Service</a> {% endcomment %}
+                <a href="{% url "home:contact" %}">Contact Us</a>
+                {% comment %} <a href="#">Careers</a> {% endcomment %}
+            </div>
+            <p class="footer-text">© 2024 Shree Rastriya Mavi School. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS (Animate On Scroll)
+        function initAOS() {
+            const elements = document.querySelectorAll('[data-aos]');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const delay = entry.target.getAttribute('data-aos-delay') || 0;
+                        setTimeout(() => {
+                            entry.target.classList.add('aos-animate');
+                        }, delay);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            elements.forEach(element => {
+                observer.observe(element);
+            });
+        }
+        
+        // Faculty Slider Functionality
+        function initFacultySlider() {
+            const slider = document.getElementById('facultySlider');
+            const prevBtn = document.getElementById('facultyPrev');
+            const nextBtn = document.getElementById('facultyNext');
+            const indicatorsContainer = document.getElementById('facultyIndicators');
+            
+            if (!slider) return;
+            
+            const cards = slider.querySelectorAll('.faculty-card');
+            const cardWidth = 320 + 32; // card width + gap
+            let currentIndex = 0;
+            
+            // Create indicators
+            function createIndicators() {
+                const totalSlides = Math.ceil(cards.length / getVisibleCards());
+                indicatorsContainer.innerHTML = '';
+                
+                for (let i = 0; i < totalSlides; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = `indicator ${i === 0 ? 'active' : ''}`;
+                    indicator.addEventListener('click', () => goToSlide(i));
+                    indicatorsContainer.appendChild(indicator);
+                }
+            }
+            
+            // Get number of visible cards based on screen size
+            function getVisibleCards() {
+                const containerWidth = slider.parentElement.offsetWidth;
+                return Math.floor(containerWidth / cardWidth);
+            }
+            
+            // Update indicators
+            function updateIndicators() {
+                const indicators = indicatorsContainer.querySelectorAll('.indicator');
+                const slideIndex = Math.floor(currentIndex / getVisibleCards());
+                
+                indicators.forEach((indicator, index) => {
+                    indicator.classList.toggle('active', index === slideIndex);
+                });
+            }
+            
+            // Go to specific slide
+            function goToSlide(slideIndex) {
+                const visibleCards = getVisibleCards();
+                currentIndex = slideIndex * visibleCards;
+                
+                if (currentIndex >= cards.length) {
+                    currentIndex = cards.length - visibleCards;
+                }
+                if (currentIndex < 0) currentIndex = 0;
+                
+                const scrollPosition = currentIndex * cardWidth;
+                slider.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+                
+                updateIndicators();
+            }
+            
+            // Next slide
+            function nextSlide() {
+                const visibleCards = getVisibleCards();
+                const maxIndex = cards.length - visibleCards;
+                
+                if (currentIndex < maxIndex) {
+                    currentIndex += visibleCards;
+                    if (currentIndex > maxIndex) currentIndex = maxIndex;
+                } else {
+                    currentIndex = 0; // Loop back to start
+                }
+                
+                const scrollPosition = currentIndex * cardWidth;
+                slider.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+                
+                updateIndicators();
+            }
+            
+            // Previous slide
+            function prevSlide() {
+                const visibleCards = getVisibleCards();
+                
+                if (currentIndex > 0) {
+                    currentIndex -= visibleCards;
+                    if (currentIndex < 0) currentIndex = 0;
+                } else {
+                    // Loop to end
+                    const maxIndex = cards.length - visibleCards;
+                    currentIndex = maxIndex > 0 ? maxIndex : 0;
+                }
+                
+                const scrollPosition = currentIndex * cardWidth;
+                slider.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+                
+                updateIndicators();
+            }
+            
+            // Event listeners
+            if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+            if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+            
+            // Touch/swipe support
+            let startX = 0;
+            let scrollLeft = 0;
+            let isDown = false;
+            
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+            
+            slider.addEventListener('mouseleave', () => {
+                isDown = false;
+            });
+            
+            slider.addEventListener('mouseup', () => {
+                isDown = false;
+            });
+            
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2;
+                slider.scrollLeft = scrollLeft - walk;
+            });
+            
+            // Touch events for mobile
+            let touchStartX = 0;
+            
+            slider.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+            
+            slider.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > 50) { // Minimum swipe distance
+                    if (diff > 0) {
+                        nextSlide();
+                    } else {
+                        prevSlide();
+                    }
+                }
+            });
+            
+            // Auto-play (optional)
+            let autoPlayInterval;
+            
+            function startAutoPlay() {
+                autoPlayInterval = setInterval(nextSlide, 5000); // 5 seconds
+            }
+            
+            function stopAutoPlay() {
+                clearInterval(autoPlayInterval);
+            }
+            
+            // Start auto-play
+            startAutoPlay();
+            
+            // Pause auto-play on hover
+            slider.addEventListener('mouseenter', stopAutoPlay);
+            slider.addEventListener('mouseleave', startAutoPlay);
+            
+            // Initialize indicators
+            createIndicators();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                createIndicators();
+                currentIndex = 0;
+                slider.scrollTo({ left: 0, behavior: 'smooth' });
+                updateIndicators();
+            });
+        }
+        
+        // Initialize everything
+        initAOS();
+        initFacultySlider();
+        
+        // Smooth scrolling for navigation links
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    const offsetTop = targetSection.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Scroll indicator functionality
+        const scrollIndicator = document.querySelector('.scroll-indicator');
+        if (scrollIndicator) {
+            scrollIndicator.addEventListener('click', function() {
+                const academicsSection = document.getElementById('academics');
+                if (academicsSection) {
+                    const offsetTop = academicsSection.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        }
+        
+        // Interactive hover effects for cards
+        function initCardEffects() {
+            const cards = document.querySelectorAll('.level-card, .curriculum-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        }
+        
+        // Initialize card effects
+        initCardEffects();
+        
+        // Download button functionality
+        const downloadBtns = document.querySelectorAll('.download-btn');
+        downloadBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Add download animation
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+                
+                // Here you would typically trigger the actual download
+                console.log('Download initiated');
+            });
+        });
+    });
+</script>
+{% endblock content %}
